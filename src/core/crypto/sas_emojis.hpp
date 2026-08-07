@@ -8,6 +8,9 @@ namespace progressive::desktop {
 struct VerificationEmoji {
     std::string emoji;
     std::string description;
+    bool operator==(const VerificationEmoji& o) const {
+        return emoji == o.emoji && description == o.description;
+    }
 };
 
 const std::vector<VerificationEmoji>& sasEmojiTable();
