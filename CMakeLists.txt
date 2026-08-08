@@ -158,6 +158,7 @@ endif()  # NOT PROGRESSIVE_CORE_ARTIFACT_USED
 
 if(PROGRESSIVE_CORE_ARTIFACT_USED)
     # Deferred: the dep targets only exist after the block above.
+    target_link_libraries(progressive_native INTERFACE olm)
     target_link_libraries(progressive_core INTERFACE
         progressive_native
         CURL::libcurl
