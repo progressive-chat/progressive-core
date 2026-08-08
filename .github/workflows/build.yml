@@ -15,18 +15,92 @@ jobs:
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: ${{ runner.os }}
+          key: ${{ runner.os }}-unity
 
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y libcurl4-openssl-dev libssl-dev libsodium-dev libsqlite3-dev ninja-build
 
-      - name: Configure
-        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+      - name: Configure (unity build)
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPROGRESSIVE_CORE_UNITY=ON -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
       - name: Build
         run: cmake --build build -j4
 
       - name: Test
         run: ctest --test-dir build --output-on-failure
+
+      - name: Package artifacts
+        run: |
+          mkdir -p package
+          cp build/libprogressive_native.a build/libprogressive_core.a package/
+          tar czf progressive-core-x86_64.tar.gz -C package .
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: core-x86_64
+          path: progressive-core-x86_64.tar.gz
+          retention-days: 5
+
+  build-arm64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install cross toolchain + arm64 libraries
+        run: |
+          sudo dpkg --add-architecture arm64
+          sudo apt-get update
+          sudo apt-get install -y ninja-build gcc-aarch64-linux-gnu g++-aarch64-linux-gnu \
+            libcurl4-openssl-dev:arm64 libssl-dev:arm64 libsodium-dev:arm64 libsqlite3-dev:arm64 pkg-config
+
+      - name: Configure (unity build, aarch64 cross)
+        run: |
+          export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig
+          cmake -S . -B build-arm64 -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DPROGRESSIVE_CORE_UNITY=ON \
+            -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_SYSTEM_PROCESSOR=aarch64 \
+            -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc \
+            -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++ \
+            -DCMAKE_FIND_ROOT_PATH=/usr/aarch64-linux-gnu \
+            -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER \
+            -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
+            -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
+            -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY
+
+      - name: Build (aarch64)
+        run: cmake --build build-arm64 -j4
+
+      - name: Package artifacts
+        run: |
+          mkdir -p package
+          cp build-arm64/libprogressive_native.a build-arm64/libprogressive_core.a package/
+          tar czf progressive-core-aarch64.tar.gz -C package .
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: core-aarch64
+          path: progressive-core-aarch64.tar.gz
+          retention-days: 5
+
+  publish:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [build, build-arm64]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Publish per-commit release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: core-${{ github.sha }}
+          name: Core ${{ github.sha }}
+          body: Prebuilt progressive-core for ${{ github.sha }} (x86_64 + aarch64). Consumed by progressive-desktop / progressive-cli when PROGRESSIVE_CORE_USE_ARTIFACT=ON.
+          files: artifacts/progressive-core-*.tar.gz
+          fail_on_unmatched_files: false
