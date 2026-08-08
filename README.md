@@ -31,8 +31,21 @@ cmake --build build -j4
 ctest --test-dir build
 ```
 
+Unity mode (3-5x faster cold rebuilds; used by CI):
+`cmake -S . -B build -G Ninja -DPROGRESSIVE_CORE_UNITY=ON`
+
 Dependencies: libcurl, OpenSSL, libsodium, SQLite3 (libolm + simdjson are
 fetched by CMake; SQLite amalgamation is downloaded at configure time).
+
+## Prebuilt artifacts
+
+CI builds + tests every `main` push (unity) for x86_64 and aarch64 (hosted
+ARM runners) and publishes the two static libraries as a per-commit release
+`core-<sha>` (`progressive-core-<arch>.tar.gz`). Consumers set
+`PROGRESSIVE_CORE_USE_ARTIFACT=ON` to download the matching archive instead
+of compiling the core (automatic source-build fallback while CI catches up).
+`scripts/unity_exclude.py` (run at configure time) keeps files that cannot
+merge into unity groups as standalone TUs.
 
 ## Refreshing `native/`
 
