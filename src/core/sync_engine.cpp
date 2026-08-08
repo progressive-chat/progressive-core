@@ -1345,13 +1345,22 @@ void SyncEngine::uploadFallbackKey() {
     std::string deviceId = client_->account().deviceId;
     if (deviceId.empty()) deviceId = "PROGRESSIVE_DESKTOP";
 
-    // Generate a fresh fallback key only if none is unpublished yet —
-    // keeps retries idempotent after a failed upload.
-    if (decryptor_.account()->unpublishedFallbackKey().empty()) {
+    // Element (rust-sdk account.rs) parity: generate a fresh fallback key
+    // when none is unpublished AND the current one is due for rotation —
+    // "due" = never created or older than 7 days (the X3DH signed pre-key
+    // bound). A still-unpublished key is kept across failed-upload retries
+    // (idempotent), but is rotated once it reaches the 7-day age.
+    bool haveUnpublished = !decryptor_.account()->unpublishedFallbackKey().empty();
+    if (!haveUnpublished || decryptor_.fallbackDueForRotation()) {
+        if (haveUnpublished) {
+            LOG(LogChannel::E2EE, "uploadFallbackKey: rotating the 7-day-old fallback key");
+            decryptor_.account()->forgetOldFallbackKey();
+        }
         if (!decryptor_.account()->generateFallbackKey()) {
             LOG(LogChannel::E2EE, "uploadFallbackKey: generateFallbackKey FAILED");
             return;
         }
+        decryptor_.noteFallbackGenerated();
         LOG(LogChannel::E2EE, "uploadFallbackKey: generated fresh fallback key");
     }
 

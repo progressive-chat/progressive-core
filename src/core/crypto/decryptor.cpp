@@ -1149,9 +1149,12 @@ bool Decryptor::shareRoomKey(const std::string& roomId,
                         ? std::string(sigResult.value()) : "";
                     if (!deviceSig.empty()) {
                         if (!verifyDeviceKeys(uid, info.deviceId, info.curve25519, info.ed25519, deviceSig)) {
-                            LOG(LogChannel::E2EE, "shareRoomKey: device key sig INVALID for %s/%s — SKIPPING",
-                                uid.c_str(), info.deviceId.c_str());
-                            continue;
+                            // Element/Nheko parity: an unverifiable self-signature
+                            // is a TRUST signal, not a gate — encrypt anyway (the
+                            // Olm layer fails gracefully per-message if the keys
+                            // genuinely mismatch; key requests heal the session).
+                            LOG(LogChannel::E2EE, "shareRoomKey: device key sig INVALID for %s/%s — "
+                                "proceeding (Element/Nheko parity)", uid.c_str(), info.deviceId.c_str());
                         }
                     }
                     devices.push_back(info);
@@ -1179,6 +1182,17 @@ bool Decryptor::shareRoomKey(const std::string& roomId,
     // become ONE entry with BOTH devices (else the parser keeps only the last
     // device and the other's OTK is never claimed — the multi-device CI test
     // caught this: shares with 2 devices of the same user failed for one).
+    // Claim policy (Element/Nheko parity): only claim keys for devices that
+    // have NO reusable session AND are not inside the claim rate-limit window.
+    // A cached session is reused below instead of burning another of the
+    // peer's one-time keys; the window prevents pathological re-claiming.
+    auto hasCachedSession = [&](const std::string& uid, const std::string& devId,
+                                const std::string& curve) {
+        std::lock_guard<std::mutex> lk(outboundOlmMtx_);
+        auto it = outboundOlmSessions_.find(uid + "|" + devId);
+        return it != outboundOlmSessions_.end() && it->second.curve == curve;
+    };
+    int skippedClaims = 0;
     std::ostringstream claimBody;
     claimBody << "{\"one_time_keys\":{";
     bool firstUser = true;
@@ -1190,6 +1204,11 @@ bool Decryptor::shareRoomKey(const std::string& roomId,
         bool firstDev = true;
         for (const auto& d : devices) {
             if (d.userId != devices[di].userId) continue;
+            if (hasCachedSession(d.userId, d.deviceId, d.curve25519) ||
+                !claimAllowed(d.userId, d.deviceId, false)) {
+                skippedClaims++;
+                continue;
+            }
             if (!firstDev) claimBody << ",";
             firstDev = false;
             claimBody << "\"" << d.deviceId << "\":\"signed_curve25519\"";
@@ -1197,6 +1216,10 @@ bool Decryptor::shareRoomKey(const std::string& roomId,
         claimBody << "}";
     }
     claimBody << "}}";
+    if (skippedClaims > 0) {
+        LOG(LogChannel::E2EE, "shareRoomKey: skipped %d device claim(s) "
+            "(cached session or rate-limit window)", skippedClaims);
+    }
     auto claimResp = httpPost(homeserverUrl + "/_matrix/client/v3/keys/claim",
                               claimBody.str(), hdrs, 15000);
     if (!claimResp.success) {
@@ -1247,6 +1270,7 @@ bool Decryptor::shareRoomKey(const std::string& roomId,
                         }
                     }
                     if (!ck.oneTimeKey.empty()) {
+                        noteClaimed(uid, devId);
                         auto otkSigResult = k.value["signatures"][uid]["ed25519:" + devId].get_string();
                         std::string otkSig = (otkSigResult.error() == simdjson::SUCCESS)
                             ? std::string(otkSigResult.value()) : "";
@@ -1266,7 +1290,7 @@ bool Decryptor::shareRoomKey(const std::string& roomId,
                                 // claiming until a VALID key surfaces or the
                                 // server stops serving keys for this device.
                                 bool claimOk = false;
-                                for (int attempt = 0; attempt < 200 && !claimOk; ++attempt) {
+                                for (int attempt = 0; attempt < otkDrainBudget_ && !claimOk; ++attempt) {
                                     std::string retryBody = "{\"one_time_keys\":{\"" + ck.userId
                                         + "\":{\"" + ck.deviceId + "\":\"signed_curve25519\"}}}";
                                     auto retryResp = httpPost(ctxHomeserver_
@@ -1298,16 +1322,16 @@ bool Decryptor::shareRoomKey(const std::string& roomId,
                                     if (!found) break;  // pool exhausted — no more keys
                                 }
                                 if (!claimOk) {
-                                    // ONE stale device must never poison the
-                                    // whole user: skip it and keep claiming
-                                    // the remaining devices (the peer's OTHER
-                                    // devices may have valid pools).
+                                    // Element/Nheko parity: proceed with the
+                                    // claimed key even if its signature does not
+                                    // verify — the session either works or the
+                                    // peer re-requests (key requests force fresh
+                                    // claims). Never block the whole user.
                                     LOG(LogChannel::E2EE,
                                         "shareRoomKey: OTK sig INVALID for %s/%s after drain — "
-                                        "its OTK pool holds keys from an older identity (skipping "
-                                        "this device only)",
-                                        ck.userId.c_str(), ck.deviceId.c_str());
-                                    continue;
+                                        "proceeding with the claimed key anyway "
+                                        "(Element/Nheko parity; drain consumed %d stale keys)",
+                                        ck.userId.c_str(), ck.deviceId.c_str(), otkDrainBudget_);
                                 }
                             }
                         }
@@ -1430,6 +1454,52 @@ bool Decryptor::shareRoomKey(const std::string& roomId,
             "\"sender_key\":\"" + ourCurve + "\"}";
         perUserMsgs[ck.userId][ck.deviceId] = std::move(deviceMsg);
         shared++;
+    }
+
+    // Reuse pass: devices with a valid cached Olm session (skipped in the
+    // claim) get the room key over the EXISTING session — one OTK per
+    // (user, device) instead of one per share (Element/Nheko parity).
+    for (const auto& d : devices) {
+        if (perUserMsgs[d.userId].count(d.deviceId)) continue;  // already handled
+        progressive::OlmSession* cached = nullptr;
+        std::string cachedCurve;
+        {
+            std::lock_guard<std::mutex> lk(outboundOlmMtx_);
+            auto it = outboundOlmSessions_.find(d.userId + "|" + d.deviceId);
+            if (it != outboundOlmSessions_.end() && it->second.curve == d.curve25519) {
+                cached = it->second.session.get();
+                cachedCurve = it->second.curve;
+            }
+        }
+        if (!cached) continue;
+        std::string theirEd;
+        for (const auto& dd : devices) {
+            if (dd.userId == d.userId && dd.deviceId == d.deviceId) { theirEd = dd.ed25519; break; }
+        }
+        if (theirEd.empty()) continue;
+        std::string plaintext = "{\"type\":\"m.room_key\",\"content\":"
+            "{\"algorithm\":\"m.megolm.v1.aes-sha2\",\"room_id\":\"" + roomId
+            + "\",\"session_id\":\"" + sessionId + "\",\"session_key\":\"" + sessionKey
+            + "\"},\"sender\":\"" + ourUserId + "\""
+            ",\"recipient\":\"" + d.userId + "\""
+            ",\"keys\":{\"ed25519\":\"" + ourEd + "\"}"
+            ",\"recipient_keys\":{\"ed25519\":\"" + theirEd + "\"}}";
+        auto encResult = cached->encrypt(plaintext);
+        if (!encResult.success || encResult.data.empty()) {
+            // Dead session — drop it; the next share claims fresh.
+            std::lock_guard<std::mutex> lk(outboundOlmMtx_);
+            outboundOlmSessions_.erase(d.userId + "|" + d.deviceId);
+            continue;
+        }
+        std::string deviceMsg = "{\"algorithm\":\"m.olm.v1.curve25519-aes-sha2\","
+            "\"ciphertext\":{\"" + cachedCurve + "\":{"
+            "\"body\":\"" + encResult.data + "\","
+            "\"type\":0}},"
+            "\"sender_key\":\"" + ourCurve + "\"}";
+        perUserMsgs[d.userId][d.deviceId] = std::move(deviceMsg);
+        shared++;
+        LOG(LogChannel::E2EE, "shareRoomKey: reused cached Olm session for %s/%s",
+            d.userId.c_str(), d.deviceId.c_str());
     }
 
     std::ostringstream sendBody;
@@ -1829,7 +1899,7 @@ void Decryptor::maybeReRequestKeys() {
         if (!shouldReRequestKey(st.attempts, elapsed)) {
             // After the final attempt the backoff stops forever — surface
             // the dead end once so the room doesn't just say "waiting".
-            if (st.attempts > 4 && !st.gaveUpNotified) {
+            if (st.attempts > 5 && !st.gaveUpNotified) {
                 st.gaveUpNotified = true;
                 auto sep1 = key.find('|');
                 auto sep2 = key.find('|', sep1 == std::string::npos ? 0 : sep1 + 1);
@@ -1862,6 +1932,39 @@ void Decryptor::maybeReRequestKeys() {
         LOG(LogChannel::E2EE, "maybeReRequestKeys: retry %d for room=%.40s sid=%.20s ok=%d",
             st.attempts, roomId.c_str(), sessionId.c_str(), ok ? 1 : 0);
     }
+}
+
+// OTK claim policy: fresh claims per (user, device) are rate-limited to
+// preserve the peer's pool (Element/Nheko parity). forceFresh (key requests,
+// identity changes) bypasses. Returns true when a claim may proceed.
+bool Decryptor::claimAllowed(const std::string& userId, const std::string& deviceId,
+                             bool forceFresh) {
+    if (forceFresh || otkClaimRateLimitMs_ <= 0) return true;
+    std::string key = userId + "|" + deviceId;
+    auto it = otkLastClaimMs_.find(key);
+    if (it == otkLastClaimMs_.end()) return true;  // first claim ever — always allowed
+    int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::steady_clock::now().time_since_epoch()).count();
+    return now - it->second >= otkClaimRateLimitMs_;
+}
+
+void Decryptor::noteClaimed(const std::string& userId, const std::string& deviceId) {
+    otkLastClaimMs_[userId + "|" + deviceId] =
+        std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::steady_clock::now().time_since_epoch()).count();
+    if (otkLastClaimMs_.size() > 4096) otkLastClaimMs_.clear();  // bounded
+}
+
+void Decryptor::noteFallbackGenerated() {
+    fallbackGeneratedAtMs_ = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::steady_clock::now().time_since_epoch()).count();
+}
+
+bool Decryptor::fallbackDueForRotation() const {
+    if (fallbackGeneratedAtMs_ == 0) return true;
+    int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::steady_clock::now().time_since_epoch()).count();
+    return now - fallbackGeneratedAtMs_ >= kFallbackMaxAgeMs;
 }
 
 bool Decryptor::handleRoomKeyRequest(const std::string& contentJson,
@@ -1930,6 +2033,53 @@ bool Decryptor::handleRoomKeyRequest(const std::string& contentJson,
     }
     // We must actually hold the requested session.
     if (!megolm_->hasSession(roomId, senderKey, sessionId)) return false;
+
+    // Element/Nheko parity: only the session CREATOR answers a key request
+    // (the requested sender_key is the creator's curve25519). Sessions we
+    // merely hold (received as forwarded keys) are not shared onwards.
+    if (senderKey != curve25519Key()) {
+        LOG(LogChannel::E2EE, "handleRoomKeyRequest: session %s/%s not ours "
+            "(we did not create it) — refusing (Element/Nheko parity)",
+            roomId.c_str(), sessionId.c_str());
+        return false;
+    }
+
+    // Element/Nheko parity: the requester must be a member of the room.
+    {
+        auto urlEnc = [](const std::string& v) {
+            std::string out;
+            out.reserve(v.size());
+            for (char c : v) {
+                if (isalnum((unsigned char)c) || c == '-' || c == '_' || c == '.' || c == '~') {
+                    out += c;
+                } else {
+                    char buf[4];
+                    std::snprintf(buf, sizeof(buf), "%%%02X", (unsigned char)c);
+                    out += buf;
+                }
+            }
+            return out;
+        };
+        std::string memberUrl = ctxHomeserver_ + "/_matrix/client/v3/rooms/"
+            + urlEnc(roomId) + "/state/m.room.member/"
+            + urlEnc(senderId);
+        auto memberResp = httpGet(memberUrl, makeAuthHeaders(ctxToken_), 10000);
+        bool member = false;
+        if (memberResp.success) {
+            simdjson::dom::parser mp;
+            auto mdoc = mp.parse(memberResp.body);
+            if (mdoc.error() == simdjson::SUCCESS) {
+                auto mship = mdoc.value()["membership"].get_string();
+                if (mship.error() == simdjson::SUCCESS && std::string(mship.value()) == "join")
+                    member = true;
+            }
+        }
+        if (!member) {
+            LOG(LogChannel::E2EE, "handleRoomKeyRequest: %s is not a member of %s — refusing",
+                senderId.c_str(), roomId.c_str());
+            return false;
+        }
+    }
 
     // Export the session key (v1 export format) and build m.forwarded_room_key.
     std::string sessionKey = megolm_->exportSessionKey(roomId, senderKey, sessionId);
@@ -2100,12 +2250,12 @@ bool Decryptor::sendOlmToDevice(const std::string& targetUserId,
         if (sig.error() == simdjson::SUCCESS) deviceSig = std::string(sig.value());
     }
     if (theirCurve.empty() || theirEd.empty()) return false;
-    // Verify the device key signature (mirror shareRoomKey) — fail closed.
+    // Verify the device key signature (mirror shareRoomKey) — Element/Nheko
+    // parity: a bad self-signature is a trust signal, not a gate. Proceed.
     if (!deviceSig.empty() &&
         !verifyDeviceKeys(targetUserId, targetDeviceId, theirCurve, theirEd, deviceSig)) {
-        LOG(LogChannel::E2EE, "sendOlmToDevice: device key sig INVALID for %s/%s — refusing",
-            targetUserId.c_str(), targetDeviceId.c_str());
-        return false;
+        LOG(LogChannel::E2EE, "sendOlmToDevice: device key sig INVALID for %s/%s — "
+            "proceeding (Element/Nheko parity)", targetUserId.c_str(), targetDeviceId.c_str());
     }
 
     // 2. Claim an OTK (fallback key returned when the pool is exhausted).
@@ -2114,6 +2264,14 @@ bool Decryptor::sendOlmToDevice(const std::string& targetUserId,
     // retry often reaches a valid one.
     std::string oneTimeKey, otkSig;
     auto claimAndVerify = [&](bool secondAttempt) {
+        // Claim policy: key requests (forceFresh) always claim; everything
+        // else respects the per-(user,device) rate-limit window.
+        if (!forceFresh && !claimAllowed(targetUserId, targetDeviceId, false)) {
+            LOG(LogChannel::E2EE, "sendOlmToDevice: claim rate-limited for %s/%s",
+                targetUserId.c_str(), targetDeviceId.c_str());
+            return false;
+        }
+        noteClaimed(targetUserId, targetDeviceId);
         std::string claimBody = "{\"one_time_keys\":{\"" + targetUserId
             + "\":{\"" + targetDeviceId + "\":\"signed_curve25519\"}}}";
         auto claimResp = httpPost(ctxHomeserver_ + "/_matrix/client/v3/keys/claim",

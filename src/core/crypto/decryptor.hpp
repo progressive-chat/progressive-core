@@ -66,11 +66,11 @@ struct OutboundMegolmSession {
 };
 
 // Pure backoff decision for the room-key request retry (testable without a
-// server). Attempts: 1st retry after 30s, 2nd after 2min, 3rd after 10min,
-// 4th after 1h, then give up.
+// server). Attempts: 1st after 10s, 2nd after 1min, 3rd after 5min, 4th
+// after 15min, 5th after 30min, then give up (with a surfaced notice).
 inline bool shouldReRequestKey(int attempts, int64_t elapsedMs) {
-    static const int64_t kSchedule[] = {30000, 120000, 600000, 3600000};
-    if (attempts <= 0 || attempts > 4) return false;
+    static const int64_t kSchedule[] = {10000, 60000, 300000, 900000, 1800000};
+    if (attempts <= 0 || attempts > 5) return false;
     return elapsedMs >= kSchedule[attempts - 1];
 }
 
@@ -189,6 +189,27 @@ public:
     // Check if room key was already shared for current outbound session.
     bool roomKeyShared(const std::string& roomId) const;
     void markRoomKeyShared(const std::string& roomId);
+
+    // OTK claim policy internals (see the public setters).
+    bool claimAllowed(const std::string& userId, const std::string& deviceId,
+                      bool forceFresh);
+    void noteClaimed(const std::string& userId, const std::string& deviceId);
+
+    // OTK claim policy (Element/Nheko parity): fresh one-time-key claims per
+    // (user, device) are rate-limited to preserve the PEER's OTK pool (each
+    // claim permanently consumes one of their keys). Key requests and
+    // identity changes bypass the window. Drain budget: how many stale keys
+    // a single share may claim+discard before giving up on a device.
+    void setOtkClaimRateLimitMs(int64_t ms) { otkClaimRateLimitMs_ = ms; }
+    int64_t otkClaimRateLimitMs() const { return otkClaimRateLimitMs_; }
+    void setOtkDrainBudget(int n) { otkDrainBudget_ = n; }
+    int otkDrainBudget() const { return otkDrainBudget_; }
+
+    // Fallback-key rotation (Element parity): a fallback is regenerated when
+    // it was claimed/missing OR when it is older than 7 days.
+    void noteFallbackGenerated();
+    bool fallbackDueForRotation() const;
+    static constexpr int64_t kFallbackMaxAgeMs = 7LL * 24 * 3600 * 1000;
 
     // ---- Room key sharing (full E2EE outbound) ----
     // Shares the outbound megolm session key with all room members' devices.
@@ -348,10 +369,15 @@ private:
         std::string senderDeviceId;
         std::string lastRequestId;                 // for request_cancellation
         std::vector<std::string> recipientDevices; // devices we asked
-        bool gaveUpNotified = false;  // surfaced the give-up row after attempt 4
+        bool gaveUpNotified = false;  // surfaced the give-up row after attempt 5
     };
     std::unordered_map<std::string, KeyRequestState> requestedKeys_;
     std::unordered_set<std::string> recentKeyRequests_;  // dedup by request_id (capped)
+    // OTK claim policy state (see the public setters).
+    std::unordered_map<std::string, int64_t> otkLastClaimMs_;  // "user|device" -> steady ms
+    int64_t otkClaimRateLimitMs_ = 300000;  // default 5 min
+    int otkDrainBudget_ = 200;              // stale keys claimed per share per device
+    int64_t fallbackGeneratedAtMs_ = 0;     // steady ms of the last fallback generation
     bool shareKeysVerifiedOnly_ = false;  // policy: only share with SAS-verified devices
     VerifiedDeviceChecker verifiedDeviceChecker_;
     // m.dummy recovery throttle: senderKey -> last attempt (ms). Time-bounded
