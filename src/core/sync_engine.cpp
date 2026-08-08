@@ -1391,4 +1391,64 @@ void SyncEngine::uploadFallbackKey() {
     }
 }
 
+ApiResult<std::string> SyncEngine::sendMessage(const std::string& roomId,
+                                                const std::string& body,
+                                                const std::string& msgtype) {
+    ApiResult<std::string> r;
+    if (!client_) { r.error.message = "not logged in"; return r; }
+    if (!client_->isRoomEncrypted(roomId)) {
+        // Plain room: nothing to encrypt.
+        return client_->sendMessage(roomId, body, msgtype);
+    }
+
+    // Encrypted room: outbound megolm session + share + encrypt + send.
+    std::string sessId = decryptor_.getOrCreateOutboundSession(roomId);
+    if (sessId.empty()) {
+        r.error.message = "could not create the outbound megolm session";
+        return r;
+    }
+    if (!decryptor_.roomKeyShared(roomId)) {
+        auto membersResp = client_->getRoomMembers(roomId, true);
+        if (membersResp.ok) {
+            std::vector<std::string> userIds;
+            simdjson::dom::parser mp;
+            auto doc = mp.parse(membersResp.data);
+            if (doc.error() == simdjson::SUCCESS) {
+                auto chunk = doc.value()["chunk"].get_array();
+                if (chunk.error() == simdjson::SUCCESS) {
+                    for (auto evt : chunk.value()) {
+                        auto mship = evt["content"]["membership"].get_string();
+                        if (mship.error() != simdjson::SUCCESS ||
+                            std::string(mship.value()) != "join") continue;
+                        auto sk = evt["state_key"].get_string();
+                        if (sk.error() == simdjson::SUCCESS)
+                            userIds.push_back(std::string(sk.value()));
+                    }
+                }
+            }
+            if (!userIds.empty()) {
+                const auto& acct = client_->account();
+                bool shared = decryptor_.shareRoomKey(
+                    roomId, userIds, acct.userId, acct.deviceId,
+                    acct.homeserverUrl, acct.accessToken);
+                if (shared) decryptor_.markRoomKeyShared(roomId);
+                LOG(LogChannel::E2EE, "sendMessage: shared room key room=%.30s ok=%d",
+                    roomId.c_str(), shared ? 1 : 0);
+            }
+        }
+    }
+
+    std::string inner = "{\"type\":\"m.room.message\",\"content\":{\"msgtype\":\""
+                        + msgtype + "\",\"body\":\"" + body + "\"},\"room_id\":\""
+                        + roomId + "\"}";
+    std::string enc = decryptor_.encryptMessage(roomId, client_->account().deviceId, inner);
+    if (enc.empty()) {
+        r.error.message = "encryption failed";
+        return r;
+    }
+    std::string txn = "ec" + std::to_string(std::time(nullptr)) + std::to_string(
+        std::chrono::steady_clock::now().time_since_epoch().count() % 100000);
+    return client_->sendEncryptedEvent(roomId, enc, txn);
+}
+
 } // namespace progressive::desktop

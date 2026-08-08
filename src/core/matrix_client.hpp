@@ -221,6 +221,9 @@ public:
     // stale member list would skip a just-joined member.
     ApiResult<std::string> getRoomMembers(const std::string& roomId, bool forceFresh = false);
 
+    // True if the room has m.room.encryption state (one state GET).
+    bool isRoomEncrypted(const std::string& roomId);
+
     // ---- Kick / Ban / Power levels ----
 
     // POST /_matrix/client/v3/rooms/{roomId}/kick  body: {"user_id":"...","reason":"..."}

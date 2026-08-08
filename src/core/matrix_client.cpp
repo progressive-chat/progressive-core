@@ -794,6 +794,14 @@ ApiResult<bool> MatrixClient::setRoomName(const std::string& roomId, const std::
     return sendStateEvent(roomId, "m.room.name", "", body);
 }
 
+bool MatrixClient::isRoomEncrypted(const std::string& roomId) {
+    if (!isLoggedIn()) return false;
+    auto resp = httpGet(account().homeserverUrl + "/_matrix/client/v3/rooms/"
+                            + urlEncodePath(roomId) + "/state/m.room.encryption",
+                        authHeaders(), 10000);
+    return resp.success && resp.statusCode == 200;
+}
+
 ApiResult<std::string> MatrixClient::getRoomMembers(const std::string& roomId, bool forceFresh) {
     ApiResult<std::string> r;
     if (!isLoggedIn()) { r.error.message = "not logged in"; return r; }

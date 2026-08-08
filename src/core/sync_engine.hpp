@@ -78,6 +78,14 @@ public:
 
     // Access the E2EE decryptor (for setup at login time).
     Decryptor* decryptor() { return &decryptor_; }
+
+    // Send a message, auto-encrypting when the room is encrypted (mirrors
+    // the desktop's share-room-key + encrypt + sendEncryptedEvent flow).
+    // Encrypted rooms: creates the outbound megolm session, shares the room
+    // key to all joined members, then sends m.room.encrypted.
+    ApiResult<std::string> sendMessage(const std::string& roomId,
+                                       const std::string& body,
+                                       const std::string& msgtype = "m.text");
     VerificationManager& verificationManager() { return verificationManager_; }
     void setPollTimeout(int ms) { syncTimeoutMs_ = ms; }
     void setBackupPathProvider(std::function<std::string()> provider) {
