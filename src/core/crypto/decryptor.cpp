@@ -2094,8 +2094,11 @@ bool Decryptor::handleRoomKeyRequest(const std::string& contentJson,
             << "\"forwarding_curve25519_key_chain\":[],"
             << "\"org.matrix.msc3061.shared_history\":true}";
 
+    // Key-request answers ALWAYS claim a fresh OTK (bypassing the claim
+    // rate limit): the requester's inbound session depends on the key we
+    // claim, and the drain consumes stale ones until a valid key surfaces.
     bool ok = sendOlmToDevice(senderId, requestingDeviceId,
-        "m.forwarded_room_key", content.str());
+        "m.forwarded_room_key", content.str(), /*forceFresh=*/true);
     LOG(LogChannel::E2EE, "handleRoomKeyRequest: forwarded key room=%.40s sid=%.20s to=%s/%s ok=%d",
         roomId.c_str(), sessionId.c_str(), senderId.c_str(),
         requestingDeviceId.c_str(), ok ? 1 : 0);
