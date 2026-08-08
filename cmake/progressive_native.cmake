@@ -93,6 +93,7 @@ if(PROGRESSIVE_CORE_UNITY)
     if(PN_UNITY_EXCLUDE_RC EQUAL 0)
         string(REPLACE "\n" ";" PN_UNITY_EXCLUDE "${PN_UNITY_EXCLUDE_OUT}")
         list(REMOVE_ITEM PN_UNITY_EXCLUDE "")
+        list(LENGTH PN_UNITY_EXCLUDE PN_UNITY_EXCLUDE_COUNT)
     else()
         message(WARNING "progressive_native: unity_exclude.py failed — unity build disabled")
         set(PROGRESSIVE_CORE_UNITY OFF)
@@ -125,7 +126,14 @@ if(PROGRESSIVE_CORE_UNITY)
         endforeach()
         list(APPEND PN_UNITY_FILES "${PN_UNITY_FILE}")
     endif()
-    message(STATUS "progressive_native: unity build ${PN_UNITY_FILES} groups")
+    set(PN_UNITY_GROUP_COUNT 0)
+    foreach(f IN LISTS PN_UNITY_FILES)
+        if(f MATCHES "/progressive_core_unity/unity_[0-9]+\.cpp$")
+            math(EXPR PN_UNITY_GROUP_COUNT "${PN_UNITY_GROUP_COUNT}+1")
+        endif()
+    endforeach()
+    message(STATUS "progressive_native: unity build — ${PN_UNITY_GROUP_COUNT} groups, "
+                   "${PN_UNITY_EXCLUDE_COUNT} standalone TUs")
     set(PN_SOURCES ${PN_UNITY_FILES})
 endif()
 
@@ -197,6 +205,7 @@ if(NOT EXISTS "${SQLITE3_SRC}")
 endif()
 
 # --- The static library ---
+if(NOT PROGRESSIVE_CORE_ARTIFACT_USED)
 add_library(progressive_native STATIC ${PN_SOURCES} "${SQLITE3_SRC}")
 
 # progressive_native is pure C++ (no Q_OBJECT, no Qt MOC). Disable AUTOMOC
@@ -263,3 +272,5 @@ if(PROGRESSIVE_LTO)
 else()
     target_compile_options(progressive_native PRIVATE -Os)
 endif()
+
+endif()  # NOT PROGRESSIVE_CORE_ARTIFACT_USED

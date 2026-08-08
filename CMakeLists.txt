@@ -29,6 +29,57 @@ configure_file(
 
 # --- Options ---
 option(PROGRESSIVE_BUILD_TESTS "Build tests" ON)
+option(PROGRESSIVE_CORE_UNITY "Merge progressive_native sources into unity groups" OFF)
+option(PROGRESSIVE_CORE_USE_ARTIFACT
+       "Download a prebuilt core (per-commit GitHub release) instead of compiling" OFF)
+
+# --- Prebuilt artifact (optional) ---
+# When consumers set PROGRESSIVE_CORE_USE_ARTIFACT=ON, we try to download
+# libprogressive_native.a + libprogressive_core.a for THIS commit and THIS
+# architecture from the core-<sha> release. On any failure we silently fall
+# back to building from source. Headers always come from the fetched source.
+set(PROGRESSIVE_CORE_ARTIFACT_USED OFF CACHE BOOL "" FORCE)
+if(PROGRESSIVE_CORE_USE_ARTIFACT)
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64|ARM64")
+        set(CORE_ARTIFACT_ARCH "aarch64")
+    else()
+        set(CORE_ARTIFACT_ARCH "x86_64")
+    endif()
+    execute_process(
+        COMMAND git -C "${CMAKE_CURRENT_SOURCE_DIR}" rev-parse HEAD
+        OUTPUT_VARIABLE CORE_SHA
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        RESULT_VARIABLE CORE_SHA_RC)
+    if(CORE_SHA_RC EQUAL 0 AND CORE_SHA)
+        set(CORE_ARTIFACT_URL
+            "https://github.com/progressive-chat/progressive-core/releases/download/core-${CORE_SHA}/progressive-core-${CORE_ARTIFACT_ARCH}.tar.gz")
+        set(CORE_ARTIFACT_DIR "${CMAKE_BINARY_DIR}/progressive-core-artifact")
+        file(MAKE_DIRECTORY "${CORE_ARTIFACT_DIR}")
+        file(DOWNLOAD "${CORE_ARTIFACT_URL}" "${CORE_ARTIFACT_DIR}/core.tar.gz"
+             STATUS CORE_DL_STATUS TLS_VERIFY ON TIMEOUT 60)
+        list(GET CORE_DL_STATUS 0 CORE_DL_RC)
+        if(CORE_DL_RC EQUAL 0)
+            file(MAKE_DIRECTORY "${CORE_ARTIFACT_DIR}/out")
+            execute_process(COMMAND tar xzf "${CORE_ARTIFACT_DIR}/core.tar.gz" -C "${CORE_ARTIFACT_DIR}/out"
+                            RESULT_VARIABLE CORE_TAR_RC)
+            if(CORE_TAR_RC EQUAL 0 AND EXISTS "${CORE_ARTIFACT_DIR}/out/libprogressive_core.a")
+                add_library(progressive_native STATIC IMPORTED GLOBAL)
+                set_target_properties(progressive_native PROPERTIES
+                    IMPORTED_LOCATION "${CORE_ARTIFACT_DIR}/out/libprogressive_native.a")
+                add_library(progressive_core STATIC IMPORTED GLOBAL)
+                set_target_properties(progressive_core PROPERTIES
+                    IMPORTED_LOCATION "${CORE_ARTIFACT_DIR}/out/libprogressive_core.a"
+                    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/src"
+                    INTERFACE_LINK_LIBRARIES "progressive_native;CURL::libcurl;${_sqlite_target};simdjson::simdjson;PkgConfig::SODIUM;OpenSSL::Crypto")
+                set(PROGRESSIVE_CORE_ARTIFACT_USED ON CACHE BOOL "" FORCE)
+                message(STATUS "progressive-core: using prebuilt artifact (${CORE_ARTIFACT_ARCH}, ${CORE_SHA})")
+            endif()
+        endif()
+        if(NOT PROGRESSIVE_CORE_ARTIFACT_USED)
+            message(STATUS "progressive-core: artifact not available (sha=${CORE_SHA} arch=${CORE_ARTIFACT_ARCH}) — building from source")
+        endif()
+    endif()
+endif()
 
 # --- libcurl (HTTP client with TLS + SOCKS5/Tor proxy) ---
 find_package(CURL REQUIRED COMPONENTS HTTPS)
@@ -51,6 +102,7 @@ if(NOT TARGET PkgConfig::SODIUM)
         INTERFACE_INCLUDE_DIRECTORIES "${SODIUM_INCLUDE_DIR}")
 endif()
 
+if(NOT PROGRESSIVE_CORE_ARTIFACT_USED)
 add_library(progressive_core STATIC
     src/core/http_client.cpp
     src/core/json_utils.cpp
@@ -101,6 +153,7 @@ target_link_libraries(progressive_core PUBLIC
     PkgConfig::SODIUM
     OpenSSL::Crypto
 )
+endif()  # NOT PROGRESSIVE_CORE_ARTIFACT_USED
 
 # --- Tests (Qt-free — the reason this repo exists) ---
 if(PROGRESSIVE_BUILD_TESTS)
