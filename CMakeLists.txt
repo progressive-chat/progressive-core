@@ -65,7 +65,8 @@ if(PROGRESSIVE_CORE_USE_ARTIFACT)
             if(CORE_TAR_RC EQUAL 0 AND EXISTS "${CORE_ARTIFACT_DIR}/out/libprogressive_core.a")
                 add_library(progressive_native STATIC IMPORTED GLOBAL)
                 set_target_properties(progressive_native PROPERTIES
-                    IMPORTED_LOCATION "${CORE_ARTIFACT_DIR}/out/libprogressive_native.a")
+                    IMPORTED_LOCATION "${CORE_ARTIFACT_DIR}/out/libprogressive_native.a"
+                    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/native/include")
                 add_library(progressive_core STATIC IMPORTED GLOBAL)
                 set_target_properties(progressive_core PROPERTIES
                     IMPORTED_LOCATION "${CORE_ARTIFACT_DIR}/out/libprogressive_core.a"
