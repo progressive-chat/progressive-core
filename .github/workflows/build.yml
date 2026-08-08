@@ -51,7 +51,7 @@ jobs:
       - name: Install cross toolchain + arm64 libraries
         run: |
           sudo dpkg --add-architecture arm64
-          sudo sed -i 's|http://security.ubuntu.com|http://archive.ubuntu.com|g; s|https://security.ubuntu.com|https://archive.ubuntu.com|g' /etc/apt/sources.list /etc/apt/sources.list.d/*.list
+          sudo sed -i 's|http://security.ubuntu.com|http://archive.ubuntu.com|g; s|https://security.ubuntu.com|https://archive.ubuntu.com|g' /etc/apt/sources.list /etc/apt/sources.list.d/* 2>/dev/null || true
           sudo apt-get update
           sudo apt-get install -y ninja-build gcc-aarch64-linux-gnu g++-aarch64-linux-gnu \
             libcurl4-openssl-dev:arm64 libssl-dev:arm64 libsodium-dev:arm64 libsqlite3-dev:arm64 pkg-config
