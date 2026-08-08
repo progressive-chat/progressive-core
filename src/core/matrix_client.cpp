@@ -563,7 +563,7 @@ ApiResult<bool> MatrixClient::changePassword(const std::string& currentPassword,
         std::ostringstream body;
         body << "{\"auth\":{\"type\":\"m.login.password\",\"identifier\":"
                 "{\"type\":\"m.id.user\",\"user\":\""
-             << account().userId << "\",\"password\":\""
+             << account().userId << "\"},\"password\":\""
              << jsonEscape(currentPassword) << "\"";
         if (!session.empty()) body << ",\"session\":\"" << session << "\"";
         body << "},\"new_password\":\"" << jsonEscape(newPassword) << "\"}";
