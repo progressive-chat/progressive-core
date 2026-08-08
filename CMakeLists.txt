@@ -69,8 +69,7 @@ if(PROGRESSIVE_CORE_USE_ARTIFACT)
                 add_library(progressive_core STATIC IMPORTED GLOBAL)
                 set_target_properties(progressive_core PROPERTIES
                     IMPORTED_LOCATION "${CORE_ARTIFACT_DIR}/out/libprogressive_core.a"
-                    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/src"
-                    INTERFACE_LINK_LIBRARIES "progressive_native;CURL::libcurl;${_sqlite_target};simdjson::simdjson;PkgConfig::SODIUM;OpenSSL::Crypto")
+                    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/src")
                 set(PROGRESSIVE_CORE_ARTIFACT_USED ON CACHE BOOL "" FORCE)
                 message(STATUS "progressive-core: using prebuilt artifact (${CORE_ARTIFACT_ARCH}, ${CORE_SHA})")
             endif()
@@ -100,6 +99,15 @@ if(NOT TARGET PkgConfig::SODIUM)
     set_target_properties(PkgConfig::SODIUM PROPERTIES
         IMPORTED_LOCATION "${SODIUM_LIBRARY}"
         INTERFACE_INCLUDE_DIRECTORIES "${SODIUM_INCLUDE_DIR}")
+endif()
+
+find_package(OpenSSL REQUIRED)
+
+# SQLite3::SQLite3 exists on modern CMake; older CI images only have the
+# deprecated SQLite::SQLite3 alias — pick whichever is available.
+set(_sqlite_target SQLite::SQLite3)
+if(TARGET SQLite3::SQLite3)
+    set(_sqlite_target SQLite3::SQLite3)
 endif()
 
 if(NOT PROGRESSIVE_CORE_ARTIFACT_USED)
@@ -136,14 +144,6 @@ target_include_directories(progressive_core PUBLIC
     src
     ${CMAKE_CURRENT_BINARY_DIR}/generated
 )
-find_package(OpenSSL REQUIRED)
-
-# SQLite3::SQLite3 exists on modern CMake; older CI images only have the
-# deprecated SQLite::SQLite3 alias — pick whichever is available.
-set(_sqlite_target SQLite::SQLite3)
-if(TARGET SQLite3::SQLite3)
-    set(_sqlite_target SQLite3::SQLite3)
-endif()
 
 target_link_libraries(progressive_core PUBLIC
     progressive_native
@@ -154,6 +154,17 @@ target_link_libraries(progressive_core PUBLIC
     OpenSSL::Crypto
 )
 endif()  # NOT PROGRESSIVE_CORE_ARTIFACT_USED
+
+if(PROGRESSIVE_CORE_ARTIFACT_USED)
+    # Deferred: the dep targets only exist after the block above.
+    target_link_libraries(progressive_core INTERFACE
+        progressive_native
+        CURL::libcurl
+        ${_sqlite_target}
+        simdjson::simdjson
+        PkgConfig::SODIUM
+        OpenSSL::Crypto)
+endif()
 
 # --- Tests (Qt-free — the reason this repo exists) ---
 if(PROGRESSIVE_BUILD_TESTS)
