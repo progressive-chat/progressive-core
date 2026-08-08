@@ -2034,15 +2034,10 @@ bool Decryptor::handleRoomKeyRequest(const std::string& contentJson,
     // We must actually hold the requested session.
     if (!megolm_->hasSession(roomId, senderKey, sessionId)) return false;
 
-    // Element/Nheko parity: only the session CREATOR answers a key request
-    // (the requested sender_key is the creator's curve25519). Sessions we
-    // merely hold (received as forwarded keys) are not shared onwards.
-    if (senderKey != curve25519Key()) {
-        LOG(LogChannel::E2EE, "handleRoomKeyRequest: session %s/%s not ours "
-            "(we did not create it) — refusing (Element/Nheko parity)",
-            roomId.c_str(), sessionId.c_str());
-        return false;
-    }
+    // NOTE: no sender-only gate here — after an identity reset our NEW curve
+    // differs from the sender_key of sessions WE created pre-reset, and those
+    // requests MUST still be answered (the drift regression test guards this).
+    // The membership check below is the security gate.
 
     // Element/Nheko parity: the requester must be a member of the room.
     {
