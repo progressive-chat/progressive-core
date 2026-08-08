@@ -58,6 +58,9 @@ void httpCleanup();
 // Pass ProxyConfig{.enabled=false} to disable.
 void setGlobalProxy(const ProxyConfig& cfg);
 
+// Return a copy of the currently-configured global proxy.
+ProxyConfig getGlobalProxy();
+
 // Execute a single HTTP request. Synchronous.
 HttpResponse httpExecute(const HttpRequest& req);
 

@@ -108,6 +108,11 @@ void setGlobalProxy(const ProxyConfig& cfg) {
     g_proxy = cfg;
 }
 
+ProxyConfig getGlobalProxy() {
+    std::lock_guard<std::mutex> lk(g_proxy_mutex);
+    return g_proxy;
+}
+
 HttpResponse httpExecute(const HttpRequest& req) {
     auto t0 = std::chrono::steady_clock::now();
     HttpResponse resp;
