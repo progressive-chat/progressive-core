@@ -164,7 +164,9 @@ FetchContent_Declare(
     GIT_TAG        v3.13.0
 )
 set(SIMDJSON_DEVELOPMENT_MODE OFF CACHE BOOL "" FORCE)
-set(SIMDJSON_BUILD_STATIC ON CACHE BOOL "" FORCE)
+# SIMDJSON_BUILD_STATIC is deprecated upstream (warns on every configure);
+# static is expressed via BUILD_SHARED_LIBS now.
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 set(SIMDJSON_DISABLE_DEPRECATED_API ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(simdjson)
 
