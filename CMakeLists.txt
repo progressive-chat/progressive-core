@@ -70,7 +70,9 @@ if(PROGRESSIVE_CORE_USE_ARTIFACT)
                 add_library(progressive_core STATIC IMPORTED GLOBAL)
                 set_target_properties(progressive_core PROPERTIES
                     IMPORTED_LOCATION "${CORE_ARTIFACT_DIR}/out/libprogressive_core.a"
-                    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/src")
+                    INTERFACE_INCLUDE_DIRECTORIES
+                        "${CMAKE_CURRENT_SOURCE_DIR}/src"
+                        "${CMAKE_CURRENT_BINARY_DIR}/generated")
                 set(PROGRESSIVE_CORE_ARTIFACT_USED ON CACHE BOOL "" FORCE)
                 message(STATUS "progressive-core: using prebuilt artifact (${CORE_ARTIFACT_ARCH}, ${CORE_SHA})")
             endif()
