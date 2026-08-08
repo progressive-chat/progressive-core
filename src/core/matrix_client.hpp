@@ -156,6 +156,14 @@ public:
     ApiResult<bool> forgetRoom(const std::string& roomId);
 
     // POST /_matrix/client/v3/delete_devices — delete current device (clears stale OTKs)
+    // Change the account password (UIA: m.login.password auth with the
+    // current password). On success the server logs out ALL OTHER devices.
+    ApiResult<bool> changePassword(const std::string& currentPassword,
+                                   const std::string& newPassword);
+
+    // List the account's sessions (raw /devices JSON for the caller to parse).
+    ApiResult<std::string> listDevices();
+
     ApiResult<std::string> deleteDevice(const std::string& deviceId,
                                           const std::string& password);
 

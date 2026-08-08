@@ -548,6 +548,75 @@ ApiResult<bool> MatrixClient::forgetRoom(const std::string& roomId) {
     return r;
 }
 
+ApiResult<bool> MatrixClient::changePassword(const std::string& currentPassword,
+                                                const std::string& newPassword) {
+    ApiResult<bool> r;
+    if (!isLoggedIn()) { r.error.message = "not logged in"; return r; }
+    if (currentPassword.empty() || newPassword.empty()) {
+        r.error.message = "password must not be empty";
+        return r;
+    }
+    // UIA: the endpoint always challenges. First call carries the password
+    // auth WITHOUT a session (the server returns the session), the retry
+    // carries auth + session + new_password.
+    auto buildBody = [&](const std::string& session) {
+        std::ostringstream body;
+        body << "{\"auth\":{\"type\":\"m.login.password\",\"identifier\":"
+                "{\"type\":\"m.id.user\",\"user\":\""
+             << account().userId << "\",\"password\":\""
+             << jsonEscape(currentPassword) << "\"";
+        if (!session.empty()) body << ",\"session\":\"" << session << "\"";
+        body << "},\"new_password\":\"" << jsonEscape(newPassword) << "\"}";
+        return body.str();
+    };
+    auto resp = httpPost(account().homeserverUrl + "/_matrix/client/v3/account/password",
+                         buildBody(""), authHeaders(), 20000);
+    r.httpStatus = resp.statusCode;
+    if (resp.success) { r.ok = true; return r; }
+    if (resp.statusCode != 401) {
+        if (!resp.body.empty()) r.error = progressive::parseMatrixErrorJson(resp.body);
+        if (r.error.message.empty()) r.error.message = resp.errorMessage;
+        return r;
+    }
+    // Extract the UIA session, then retry with auth + session.
+    std::string session;
+    {
+        simdjson::dom::parser p;
+        auto doc = p.parse(resp.body);
+        if (doc.error() == simdjson::SUCCESS) {
+            auto s = doc.value()["session"].get_string();
+            if (s.error() == simdjson::SUCCESS) session = std::string(s.value());
+        }
+    }
+    if (session.empty()) { r.error.message = "UIA challenge missing session"; return r; }
+    auto resp2 = httpPost(account().homeserverUrl + "/_matrix/client/v3/account/password",
+                          buildBody(session), authHeaders(), 20000);
+    r.httpStatus = resp2.statusCode;
+    if (resp2.success) {
+        r.ok = true;
+    } else {
+        if (!resp2.body.empty()) r.error = progressive::parseMatrixErrorJson(resp2.body);
+        if (r.error.message.empty()) r.error.message = resp2.errorMessage;
+    }
+    return r;
+}
+
+ApiResult<std::string> MatrixClient::listDevices() {
+    ApiResult<std::string> r;
+    if (!isLoggedIn()) { r.error.message = "not logged in"; return r; }
+    auto resp = httpGet(account().homeserverUrl + "/_matrix/client/v3/devices",
+                        authHeaders(), 15000);
+    r.httpStatus = resp.statusCode;
+    if (resp.success) {
+        r.ok = true;
+        r.data = resp.body;
+    } else {
+        if (!resp.body.empty()) r.error = progressive::parseMatrixErrorJson(resp.body);
+        if (r.error.message.empty()) r.error.message = resp.errorMessage;
+    }
+    return r;
+}
+
 ApiResult<std::string> MatrixClient::deleteDevice(const std::string& deviceId,
                                                     const std::string& password) {
     ApiResult<std::string> r;
