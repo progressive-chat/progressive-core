@@ -1294,11 +1294,16 @@ bool Decryptor::shareRoomKey(const std::string& roomId,
                                     }
                                 }
                                 if (!retryOk) {
+                                    // ONE stale device must never poison the
+                                    // whole user: skip it and keep claiming
+                                    // the remaining devices (the peer's OTHER
+                                    // devices may have valid pools).
                                     LOG(LogChannel::E2EE,
                                         "shareRoomKey: OTK sig INVALID for %s/%s after re-claim — "
-                                        "its OTK pool holds keys from an older identity",
+                                        "its OTK pool holds keys from an older identity (skipping "
+                                        "this device only)",
                                         ck.userId.c_str(), ck.deviceId.c_str());
-                                    break;
+                                    continue;
                                 }
                             }
                         }
