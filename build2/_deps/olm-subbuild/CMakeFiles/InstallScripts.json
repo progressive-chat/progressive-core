@@ -1,7 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"/tmp/opencode/progressive-core/build2/_deps/olm-subbuild/cmake_install.cmake"
-	],
-	"Parallel" : false
-}
