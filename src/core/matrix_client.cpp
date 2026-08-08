@@ -969,20 +969,39 @@ ApiResult<std::string> MatrixClient::getSpaceHierarchy(const std::string& spaceI
 ApiResult<std::vector<uint8_t>> MatrixClient::downloadMedia(const std::string& mxcUrl, int width, int height) {
     ApiResult<std::vector<uint8_t>> r;
     if (!isLoggedIn()) { r.error.message = "not logged in"; return r; }
-    // Resolve mxc:// to HTTP URL using progressive::resolveMxcDownloadUrl / resolveMxcThumbnailUrl
-    std::string httpUrl;
-    if (width > 0 && height > 0) {
-        httpUrl = progressive::resolveMxcThumbnailUrl(mxcUrl, account().homeserverUrl, width, height, "scale");
-    } else {
-        httpUrl = progressive::resolveMxcDownloadUrl(mxcUrl, account().homeserverUrl);
-    }
-    if (httpUrl.empty() || httpUrl == mxcUrl) {
+    // Current homeservers (matrix.org since the media-API v1 rollout) serve
+    // media ONLY through the AUTHENTICATED /_matrix/client/v1/media/*
+    // endpoints — the legacy /_matrix/media/v3/* answers 404 even to
+    // authenticated requests for newer media. Try v1 first, fall back to v3
+    // on 404/400 (mtxclient/Nheko parity). Remote media is still proxied by
+    // the homeserver; the origin fallback below covers federation failures.
+    std::string srv = progressive::extractMxcServerName(mxcUrl);
+    std::string mid = progressive::extractMxcMediaId(mxcUrl);
+    if (srv.empty() || mid.empty()) {
         r.error.message = "invalid mxc URL";
         return r;
     }
+    std::string base = account().homeserverUrl;
+    while (!base.empty() && base.back() == '/') base.pop_back();
+    const bool thumb = width > 0 && height > 0;
+    auto buildMediaUrl = [&](const char* ns) {
+        std::ostringstream out;
+        out << base << "/_matrix/" << ns << "/media/"
+            << (thumb ? "thumbnail/" : "download/") << srv << "/" << mid;
+        if (thumb)
+            out << "?width=" << width << "&height=" << height << "&method=scale";
+        return out.str();
+    };
+    std::string httpUrl = buildMediaUrl("client/v1");
     LOG(LogChannel::NET, "downloadMedia: mxc=%.120s -> http=%d ok=%d size=%zu err=%.120s",
         mxcUrl.c_str(), 0, 0, (size_t)0, httpUrl.c_str());
     auto resp = httpGet(httpUrl, authHeaders(), 30000);
+    if (!resp.success && (resp.statusCode == 404 || resp.statusCode == 400)) {
+        httpUrl = buildMediaUrl("media/v3");
+        LOG(LogChannel::NET, "downloadMedia: v1 HTTP %d for mxc=%.120s — falling back to v3 %s",
+            resp.statusCode, mxcUrl.c_str(), httpUrl.c_str());
+        resp = httpGet(httpUrl, authHeaders(), 30000);
+    }
     r.httpStatus = resp.statusCode;
     bool originFailed = false;
     // Origin fallback: the homeserver could not serve REMOTE media (not in
