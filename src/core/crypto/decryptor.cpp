@@ -1259,47 +1259,51 @@ bool Decryptor::shareRoomKey(const std::string& roomId,
                         }
                         if (!otkSig.empty() && !devEd25519.empty()) {
                             if (!verifyOtk(devEd25519, ck.oneTimeKey, otkSig)) {
-                                // Retry the claim once — a fresh OTK may be
-                                // served (stale keys are also consumed by
-                                // claiming, so a retry often reaches a good one).
-                                std::string retryBody = "{\"one_time_keys\":{\"" + ck.userId
-                                    + "\":{\"" + ck.deviceId + "\":\"signed_curve25519\"}}}";
-                                auto retryResp = httpPost(ctxHomeserver_
-                                    + "/_matrix/client/v3/keys/claim", retryBody, hdrs, 15000);
-                                bool retryOk = false;
-                                if (retryResp.success) {
+                                // Stale-OTK drain: the device's pool may hold
+                                // keys signed by an OLDER identity (uploaded
+                                // before a reset) ahead of the fresh ones.
+                                // Each claim consumes the stale key, so keep
+                                // claiming until a VALID key surfaces or the
+                                // server stops serving keys for this device.
+                                bool claimOk = false;
+                                for (int attempt = 0; attempt < 6 && !claimOk; ++attempt) {
+                                    std::string retryBody = "{\"one_time_keys\":{\"" + ck.userId
+                                        + "\":{\"" + ck.deviceId + "\":\"signed_curve25519\"}}}";
+                                    auto retryResp = httpPost(ctxHomeserver_
+                                        + "/_matrix/client/v3/keys/claim", retryBody, hdrs, 15000);
+                                    if (!retryResp.success) break;
                                     simdjson::dom::parser rp;
                                     auto rdoc = rp.parse(retryResp.body);
-                                    if (rdoc.error() == simdjson::SUCCESS) {
-                                        auto rdev = rdoc.value()["one_time_keys"][ck.userId][ck.deviceId];
-                                        auto rkeyObj = rdev.get_object();
-                                        if (rkeyObj.error() == simdjson::SUCCESS) {
-                                            for (auto rk : rkeyObj.value()) {
-                                                if (std::string(rk.key).find("signed_curve25519:") != 0) continue;
-                                                auto rkv = rk.value["key"].get_string();
-                                                if (rkv.error() == simdjson::SUCCESS) {
-                                                    auto rkSig = rk.value["signatures"][ck.userId]
-                                                        ["ed25519:" + ck.deviceId].get_string();
-                                                    if (rkSig.error() != simdjson::SUCCESS ||
-                                                        verifyOtk(devEd25519,
-                                                                  std::string(rkv.value()),
-                                                                  std::string(rkSig.value()))) {
-                                                        ck.oneTimeKey = std::string(rkv.value());
-                                                        retryOk = true;
-                                                    }
-                                                }
-                                                break;
-                                            }
+                                    if (rdoc.error() != simdjson::SUCCESS) break;
+                                    auto rdev = rdoc.value()["one_time_keys"][ck.userId][ck.deviceId];
+                                    auto rkeyObj = rdev.get_object();
+                                    if (rkeyObj.error() != simdjson::SUCCESS) break;
+                                    bool found = false;
+                                    for (auto rk : rkeyObj.value()) {
+                                        if (std::string(rk.key).find("signed_curve25519:") != 0) continue;
+                                        found = true;
+                                        auto rkv = rk.value["key"].get_string();
+                                        if (rkv.error() != simdjson::SUCCESS) continue;
+                                        auto rkSig = rk.value["signatures"][ck.userId]
+                                            ["ed25519:" + ck.deviceId].get_string();
+                                        if (rkSig.error() != simdjson::SUCCESS ||
+                                            verifyOtk(devEd25519,
+                                                      std::string(rkv.value()),
+                                                      std::string(rkSig.value()))) {
+                                            ck.oneTimeKey = std::string(rkv.value());
+                                            claimOk = true;
                                         }
+                                        break;
                                     }
+                                    if (!found) break;  // pool exhausted — no more keys
                                 }
-                                if (!retryOk) {
+                                if (!claimOk) {
                                     // ONE stale device must never poison the
                                     // whole user: skip it and keep claiming
                                     // the remaining devices (the peer's OTHER
                                     // devices may have valid pools).
                                     LOG(LogChannel::E2EE,
-                                        "shareRoomKey: OTK sig INVALID for %s/%s after re-claim — "
+                                        "shareRoomKey: OTK sig INVALID for %s/%s after drain — "
                                         "its OTK pool holds keys from an older identity (skipping "
                                         "this device only)",
                                         ck.userId.c_str(), ck.deviceId.c_str());
