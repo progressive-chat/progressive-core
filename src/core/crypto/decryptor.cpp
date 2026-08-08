@@ -1266,7 +1266,7 @@ bool Decryptor::shareRoomKey(const std::string& roomId,
                                 // claiming until a VALID key surfaces or the
                                 // server stops serving keys for this device.
                                 bool claimOk = false;
-                                for (int attempt = 0; attempt < 6 && !claimOk; ++attempt) {
+                                for (int attempt = 0; attempt < 25 && !claimOk; ++attempt) {
                                     std::string retryBody = "{\"one_time_keys\":{\"" + ck.userId
                                         + "\":{\"" + ck.deviceId + "\":\"signed_curve25519\"}}}";
                                     auto retryResp = httpPost(ctxHomeserver_
