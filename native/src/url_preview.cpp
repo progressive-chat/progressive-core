@@ -170,7 +170,7 @@ std::vector<std::string> extractUrls(const std::string& html) {
     return urls;
 }
 
-std::string stripHtmlTags(const std::string& html) {
+inline std::string stripHtmlTags(const std::string& html) {
     std::string result;
     bool inTag = false;
     for (char c : html) {

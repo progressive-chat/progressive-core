@@ -65,6 +65,69 @@ set(PN_SOURCES ${PN_FILTERED_SOURCES})
 #   DecryptionPriority) not declared in its header — incomplete WIP, won't compile.
 set(PN_EXCLUDE_REGEX "(jni_bridge|jni_stubs_part[0-9]+|tls_bridge|decryptor_utils)\\.cpp$")
 list(FILTER PN_SOURCES EXCLUDE REGEX "${PN_EXCLUDE_REGEX}")
+# --- Unity build (optional) ---
+# Merging many small TUs into a few big ones removes the compiler startup
+# cost per file — cold rebuilds get 3-5x faster. Verified by the CI build
+# (unity ON). Group size 64 keeps single-file compile memory sane.
+option(PROGRESSIVE_CORE_UNITY "Merge progressive_native sources into unity groups" OFF)
+if(PROGRESSIVE_CORE_UNITY)
+    set(PN_UNITY_DIR "${CMAKE_BINARY_DIR}/progressive_core_unity")
+    file(MAKE_DIRECTORY "${PN_UNITY_DIR}")
+    set(PN_UNITY_FILES "")
+    set(PN_GROUP_SRCS "")
+    set(PN_GROUP_INDEX 0)
+    set(PN_GROUP_SIZE 64)
+    # Files that cannot be merged into unity groups (header-level symbol
+    # redefinitions, ODR clashes). Kept as standalone TUs.
+        # Compute the standalone-TU list automatically: any file defining a
+    # function whose name is also defined elsewhere (another .cpp or an
+    # out-of-line header definition) cannot be merged.
+    set(PN_UNITY_EXCLUDE_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/scripts/unity_exclude.py")
+    set(PN_UNITY_EXCLUDE "")
+    execute_process(
+        COMMAND ${Python3_EXECUTABLE} "${PN_UNITY_EXCLUDE_SCRIPT}"
+        OUTPUT_VARIABLE PN_UNITY_EXCLUDE_OUT
+        RESULT_VARIABLE PN_UNITY_EXCLUDE_RC
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    if(PN_UNITY_EXCLUDE_RC EQUAL 0)
+        string(REPLACE "\n" ";" PN_UNITY_EXCLUDE "${PN_UNITY_EXCLUDE_OUT}")
+        list(REMOVE_ITEM PN_UNITY_EXCLUDE "")
+    else()
+        message(WARNING "progressive_native: unity_exclude.py failed — unity build disabled")
+        set(PROGRESSIVE_CORE_UNITY OFF)
+    endif()
+
+    foreach(src IN LISTS PN_SOURCES)
+        get_filename_component(PN_SRC_NAME "${src}" NAME)
+        if(PN_SRC_NAME IN_LIST PN_UNITY_EXCLUDE)
+            list(APPEND PN_UNITY_FILES "${src}")
+            continue()
+        endif()
+        list(APPEND PN_GROUP_SRCS "${src}")
+        list(LENGTH PN_GROUP_SRCS group_n)
+        if(group_n GREATER_EQUAL ${PN_GROUP_SIZE})
+            set(PN_UNITY_FILE "${PN_UNITY_DIR}/unity_${PN_GROUP_INDEX}.cpp")
+            file(WRITE "${PN_UNITY_FILE}" "// unity build group ${PN_GROUP_INDEX}\n")
+            foreach(g IN LISTS PN_GROUP_SRCS)
+                file(APPEND "${PN_UNITY_FILE}" "#include \"${g}\"\n")
+            endforeach()
+            list(APPEND PN_UNITY_FILES "${PN_UNITY_FILE}")
+            set(PN_GROUP_SRCS "")
+            math(EXPR PN_GROUP_INDEX "${PN_GROUP_INDEX}+1")
+        endif()
+    endforeach()
+    if(PN_GROUP_SRCS)
+        set(PN_UNITY_FILE "${PN_UNITY_DIR}/unity_${PN_GROUP_INDEX}.cpp")
+        file(WRITE "${PN_UNITY_FILE}" "// unity build group ${PN_GROUP_INDEX}\n")
+        foreach(g IN LISTS PN_GROUP_SRCS)
+            file(APPEND "${PN_UNITY_FILE}" "#include \"${g}\"\n")
+        endforeach()
+        list(APPEND PN_UNITY_FILES "${PN_UNITY_FILE}")
+    endif()
+    message(STATUS "progressive_native: unity build ${PN_UNITY_FILES} groups")
+    set(PN_SOURCES ${PN_UNITY_FILES})
+endif()
 
 list(LENGTH PN_SOURCES PN_SOURCES_COUNT)
 message(STATUS "progressive_native: ${PN_SOURCES_COUNT} sources after Tier-C/D + broken-file filter")

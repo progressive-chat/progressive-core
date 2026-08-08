@@ -37,7 +37,7 @@ std::string isPublicRoom(const std::string& json) {
     return oss.str();
 }
 
-std::string buildJoinRulesEvent(const std::string& json) {
+inline std::string buildJoinRulesEvent(const std::string& json) {
     if (json.empty()) return R"({"ok":false,"error":"empty_input"})";
     std::ostringstream oss;
     oss << R"({"ok":true,"method":")" << "buildJoinRulesEvent" << R"(","input_len":)" << json.size();

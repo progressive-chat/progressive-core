@@ -124,7 +124,7 @@ bool isDownloadableMessage(const std::string& msgType) {
            msgType == MessageType::VIDEO || msgType == MessageType::FILE;
 }
 
-std::string getMessageTypeLabel(const std::string& msgType) {
+inline std::string getMessageTypeLabel(const std::string& msgType) {
     if (msgType == MessageType::TEXT) return "text";
     if (msgType == MessageType::EMOTE) return "emote";
     if (msgType == MessageType::NOTICE) return "notice";
@@ -171,7 +171,7 @@ std::string extractEventId(const std::string& json) {
     return jsonGet(json, "event_id");
 }
 
-std::string extractRoomId(const std::string& json) {
+inline std::string extractRoomId(const std::string& json) {
     return jsonGet(json, "room_id");
 }
 

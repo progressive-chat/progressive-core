@@ -119,7 +119,7 @@ std::string isValidDeeplink(const std::string& json) {
     return o.str();
 }
 
-std::string extractRoomId(const std::string& json) {
+inline std::string extractRoomId(const std::string& json) {
     if (json.empty()) return R"({"ok":false,"fn":"extractRoomId"})";
     
     std::string eventId = parseJsonStringValue(json, "event_id");

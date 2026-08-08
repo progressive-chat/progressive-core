@@ -12,7 +12,7 @@ using progressive::parseJsonStringValue;
 using progressive::parseJsonBoolValue;
 using progressive::parseJsonInt64Value;
 
-std::string createAccount(const std::string& json) {
+inline std::string createAccount(const std::string& json) {
     if (json.empty()) return R"({"ok":false,"error":"empty input","fn":"createAccount"})";
     
     std::string type = parseJsonStringValue(json, "type");
@@ -34,7 +34,7 @@ std::string createAccount(const std::string& json) {
     return o.str();
 }
 
-std::string signMessage(const std::string& json) {
+inline std::string signMessage(const std::string& json) {
     if (json.empty()) return R"({"ok":false,"error":"empty input","fn":"signMessage"})";
     
     std::string input = parseJsonStringValue(json, "input");
@@ -114,7 +114,7 @@ std::string generateKeys(const std::string& json) {
     return o.str();
 }
 
-std::string getIdentityKey(const std::string& json) {
+inline std::string getIdentityKey(const std::string& json) {
     std::ostringstream o;
     o << R"({"fn":")" << "getIdentityKey" << R"(","ok":true)";
     

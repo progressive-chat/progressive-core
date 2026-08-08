@@ -15,7 +15,7 @@ std::string buildRoomPermalink(const std::string& roomId, const std::string& via
     return url;
 }
 
-std::string buildUserPermalink(const std::string& userId) {
+inline std::string buildUserPermalink(const std::string& userId) {
     return "https://matrix.to/#/" + userId;
 }
 
@@ -62,7 +62,7 @@ bool parsePermalink(const std::string& url, std::string& type, std::string& id) 
     return false;
 }
 
-bool isPermalink(const std::string& url) {
+inline bool isPermalink(const std::string& url) {
     return url.rfind("https://matrix.to/#/", 0) == 0;
 }
 

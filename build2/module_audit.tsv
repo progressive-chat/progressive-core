@@ -1,0 +1,882 @@
+account_data_utils.cpp	A	real (157 lines)	5195
+account_deactivation_utils.cpp	A	real (173 lines)	7346
+account_export.cpp	A	real (89 lines)	3329
+account_manager.cpp	B	auto-generated template header	18716
+account_utils.cpp	A	real (170 lines)	6193
+account_validator.cpp	A	real (159 lines)	6693
+admin_utils.cpp	A	real (173 lines)	7307
+agent_executor.cpp	A	real (348 lines)	13428
+alarm_engine.cpp	A	real (302 lines)	10434
+alias_manager.cpp	C	size echo stub (5 json.size() calls, 10 lines)	1811
+attachment_handler.cpp	A	real (154 lines)	6650
+audio_engine.cpp	A	real (48 lines)	1725
+auth_models.cpp	A	real (252 lines)	9683
+auth_service_v4.cpp	A	real (830 lines)	37121
+auth_utils.cpp	A	real (164 lines)	5775
+avatar_color_gen.cpp	A	real (159 lines)	6447
+avatar_cropper.cpp	A	real (171 lines)	7092
+avatar_fallback_utils.cpp	A	real (63 lines)	2424
+avatar_history.cpp	A	real (360 lines)	11340
+avatar_picker.cpp	A	real (151 lines)	6184
+avatar_url_utils.cpp	A	real (73 lines)	3119
+avatar_utils.cpp	C	broken header (12 garbage decls in avatar_utils.hpp)	896
+background_scheduler.cpp	A	real (144 lines)	5892
+backup_controller.cpp	B	auto-generated template header	18792
+backup_keys_utils.cpp	A	real (93 lines)	3746
+backup_restore_utils.cpp	A	real (168 lines)	7027
+backup_utils.cpp	A	real (298 lines)	10102
+backup_version_utils.cpp	A	real (65 lines)	3453
+batch_a1.cpp	C	hash echo stub (30 std::hash calls, 244 lines)	8054
+batch_a2.cpp	C	hash echo stub (30 std::hash calls, 244 lines)	8054
+batch_a3.cpp	C	hash echo stub (30 std::hash calls, 244 lines)	8054
+batch_a4.cpp	C	hash echo stub (30 std::hash calls, 244 lines)	8054
+batch_a5.cpp	C	hash echo stub (30 std::hash calls, 244 lines)	8054
+batch_a6.cpp	C	hash echo stub (30 std::hash calls, 244 lines)	8054
+batch_a7.cpp	C	hash echo stub (30 std::hash calls, 244 lines)	8054
+batch_a8.cpp	C	hash echo stub (30 std::hash calls, 244 lines)	8054
+batch_a9.cpp	C	hash echo stub (30 std::hash calls, 244 lines)	8054
+batch_b1.cpp	C	hash echo stub (30 std::hash calls, 244 lines)	8054
+batch_b2.cpp	C	hash echo stub (30 std::hash calls, 244 lines)	8054
+batch_b3.cpp	C	hash echo stub (30 std::hash calls, 244 lines)	8054
+batch_b4.cpp	C	hash echo stub (30 std::hash calls, 244 lines)	8054
+batch_b5.cpp	C	hash echo stub (30 std::hash calls, 244 lines)	8054
+batch_b6.cpp	C	hash echo stub (30 std::hash calls, 244 lines)	8054
+batch_b7.cpp	C	hash echo stub (30 std::hash calls, 244 lines)	8054
+batch_b8.cpp	C	hash echo stub (30 std::hash calls, 244 lines)	8054
+batch_b9.cpp	C	hash echo stub (30 std::hash calls, 244 lines)	8054
+bidirectional_utils.cpp	C	size echo stub (2 json.size() calls, 29 lines)	1450
+big_0.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27697
+big_1.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27697
+big_10.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_11.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_12.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_13.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_14.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_15.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_16.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_17.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_18.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_19.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_2.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27697
+big_20.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_21.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_22.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_23.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_24.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_25.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_26.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_27.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_28.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_29.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_3.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27697
+big_30.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_31.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_32.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_33.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_34.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_35.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_36.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_37.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_38.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_39.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_4.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27697
+big_40.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_41.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_42.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_43.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_44.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_45.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_46.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_47.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_48.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_49.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_5.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27697
+big_50.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_51.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_52.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_53.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_54.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_55.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_56.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_57.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_58.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_59.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_6.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27697
+big_60.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_61.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_62.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_63.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_64.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_65.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_66.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_67.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_68.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_69.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_7.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27697
+big_70.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_71.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_72.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_73.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_74.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_75.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_76.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_77.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_78.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_79.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27997
+big_8.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27697
+big_9.cpp	C	hash echo stub (100 std::hash calls, 807 lines)	27697
+biometric_auth.cpp	A	real (165 lines)	6841
+cache_invalidator.cpp	A	real (65 lines)	3386
+cache_manager.cpp	A	real (163 lines)	4994
+call_duration.cpp	A	real (65 lines)	3404
+call_event_formatter.cpp	C	broken header (5 garbage decls in call_event_formatter.hpp)	2115
+call_manager.cpp	A	real (662 lines)	24229
+call_models.cpp	A	real (276 lines)	10178
+call_signaling.cpp	B	auto-generated template header	18729
+canonical_alias_util.cpp	A	real (65 lines)	3467
+canonical_json.cpp	A	real (224 lines)	7715
+capabilities_utils.cpp	A	real (65 lines)	3413
+chat_features.cpp	A	real (140 lines)	4569
+chat_preview.cpp	A	real (303 lines)	11687
+chat_tools.cpp	A	real (339 lines)	11948
+chunked_upload.cpp	A	real (131 lines)	3756
+client_info.cpp	A	real (116 lines)	3927
+color_utils.cpp	A	real (171 lines)	5452
+common_utils.cpp	A	real (65 lines)	3381
+composer_manager.cpp	A	real (362 lines)	12587
+config_loader.cpp	A	real (157 lines)	6681
+connection_monitor.cpp	A	real (104 lines)	3284
+contact_utils.cpp	C	size echo stub (2 json.size() calls, 5 lines)	501
+content_builder.cpp	A	real (65 lines)	3450
+content_builder_utils.cpp	C	broken header (19 garbage decls in content_builder_utils.hpp)	921
+content_filter.cpp	A	real (94 lines)	2791
+content_guard.cpp	A	real (274 lines)	9876
+content_report_utils.cpp	A	real (168 lines)	7037
+content_scanner.cpp	A	real (105 lines)	3621
+content_text_utils.cpp	A	real (167 lines)	6443
+content_utils.cpp	A	real (573 lines)	22321
+content_warning_utils.cpp	C	size echo stub (2 json.size() calls, 5 lines)	503
+crash_reporter.cpp	A	real (150 lines)	5962
+create_room.cpp	A	real (202 lines)	7547
+cross_sign_bootstrap.cpp	A	real (159 lines)	6472
+cross_sign_utils.cpp	A	real (153 lines)	6533
+cross_sign_v4.cpp	A	real (830 lines)	37121
+cross_signing.cpp	A	real (116 lines)	4958
+cross_signing_manager.cpp	A	real (342 lines)	12488
+cross_signing_status.cpp	A	real (159 lines)	6465
+crypto_algorithms.cpp	A	real (166 lines)	5704
+crypto_device_utils.cpp	C	broken header (9 garbage decls in crypto_device_utils.hpp)	672
+crypto_init_utils.cpp	A	real (159 lines)	6453
+crypto_models.cpp	A	real (197 lines)	6967
+crypto_ops.cpp	B	auto-generated template header	34017
+crypto_utils_v2.cpp	A	real (58 lines)	1185
+custom_emoji_utils.cpp	A	real (98 lines)	4209
+custom_status.cpp	A	real (165 lines)	6888
+date_utils.cpp	A	real (197 lines)	5992
+debug_service.cpp	A	real (113 lines)	4184
+decryptor_utils.cpp	A	real (329 lines)	11721
+deeplink_parser.cpp	A	real (198 lines)	8790
+dehydrate_utils.cpp	A	real (153 lines)	6560
+deleted_archive.cpp	A	real (71 lines)	2256
+desync_detector.cpp	A	real (257 lines)	9271
+device_list_v4.cpp	A	real (830 lines)	37122
+device_manager.cpp	A	real (252 lines)	9496
+device_manager_full.cpp	A	real (445 lines)	17320
+device_naming.cpp	A	real (390 lines)	15218
+device_naming_helper.cpp	C	broken header (11 garbage decls in device_naming_helper.hpp)	958
+device_rename_utils.cpp	A	real (73 lines)	3161
+device_trust.cpp	C	broken header (3 garbage decls in device_trust.hpp)	914
+device_verif.cpp	A	real (499 lines)	29181
+device_verifier.cpp	A	real (172 lines)	7292
+direct_message_utils.cpp	A	real (4 lines)	291
+dispatch_manager.cpp	A	real (144 lines)	5924
+display_name_utils.cpp	A	real (113 lines)	4686
+displayname_utils.cpp	A	real (240 lines)	7907
+draft_manager.cpp	A	real (137 lines)	4574
+draft_manager_full.cpp	A	real (206 lines)	6456
+draft_manager_utils.cpp	C	broken header (3 garbage decls in draft_manager_utils.hpp)	917
+e2ee_decor_v4.cpp	A	real (613 lines)	25731
+e2ee_decoration.cpp	A	real (226 lines)	8406
+e2ee_manager.cpp	B	auto-generated template header	18770
+e2ee_utils.cpp	A	real (84 lines)	2756
+edit_history.cpp	A	real (196 lines)	6638
+email_utils.cpp	C	size echo stub (4 json.size() calls, 7 lines)	891
+emoji_analyzer.cpp	A	real (137 lines)	4742
+emoji_reaction_picker.cpp	C	size echo stub (4 json.size() calls, 7 lines)	901
+emoji_search.cpp	A	real (159 lines)	6453
+emoji_sticker.cpp	A	real (172 lines)	7223
+emoji_utils.cpp	C	size echo stub (4 json.size() calls, 7 lines)	893
+encrypted_file.cpp	A	real (179 lines)	6207
+encryption_key_backup.cpp	A	real (152 lines)	6126
+encryption_key_utils.cpp	C	broken header (4 garbage decls in encryption_key_utils.hpp)	733
+encryption_status.cpp	C	size echo stub (4 json.size() calls, 7 lines)	883
+encryption_status_formatter.cpp	A	real (40 lines)	1752
+encryption_verify_utils.cpp	A	real (168 lines)	6840
+event_age_utils.cpp	C	size echo stub (3 json.size() calls, 6 lines)	678
+event_aggregation_utils.cpp	C	broken header (15 garbage decls in event_aggregation_utils.hpp)	479
+event_batcher.cpp	A	real (137 lines)	5578
+event_builder.cpp	B	auto-generated template header	18733
+event_classifier.cpp	A	real (221 lines)	11083
+event_content_utils.cpp	A	real (165 lines)	7643
+event_context_builder.cpp	C	size echo stub (4 json.size() calls, 7 lines)	899
+event_context_utils.cpp	A	real (23 lines)	1049
+event_delivery_utils.cpp	A	real (4 lines)	287
+event_display.cpp	A	real (174 lines)	7605
+event_display_formatter.cpp	C	broken header (7 garbage decls in event_display_formatter.hpp)	939
+event_encryption.cpp	A	real (147 lines)	5108
+event_encryption_helper.cpp	A	real (44 lines)	1693
+event_filter_utils.cpp	C	broken header (11 garbage decls in event_filter_utils.hpp)	486
+event_forward_utils.cpp	A	real (57 lines)	2253
+event_hash_utils.cpp	A	real (99 lines)	4089
+event_highlight_display.cpp	A	real (103 lines)	4005
+event_highlight_utils.cpp	C	broken header (9 garbage decls in event_highlight_utils.hpp)	0
+event_id_utils.cpp	A	real (50 lines)	1487
+event_link.cpp	A	real (119 lines)	3871
+event_models.cpp	A	real (401 lines)	15453
+event_origin_utils.cpp	A	real (119 lines)	5301
+event_pagination.cpp	A	real (72 lines)	2604
+event_receipt_utils.cpp	C	broken header (7 garbage decls in event_receipt_utils.hpp)	698
+event_redaction.cpp	C	broken header (7 garbage decls in event_redaction.hpp)	712
+event_relations.cpp	A	real (253 lines)	9069
+event_relations_manager.cpp	A	real (330 lines)	12284
+event_relations_utils.cpp	C	size echo stub (3 json.size() calls, 6 lines)	720
+event_relations_v4.cpp	A	real (830 lines)	37122
+event_reminder.cpp	C	broken header (14 garbage decls in event_reminder.hpp)	824
+event_retention.cpp	A	real (141 lines)	5843
+event_search.cpp	C	broken header (8 garbage decls in event_search.hpp)	707
+event_sender_utils.cpp	C	size echo stub (2 json.size() calls, 5 lines)	506
+event_signature_utils.cpp	C	size echo stub (3 json.size() calls, 6 lines)	694
+event_state_utils.cpp	C	broken header (7 garbage decls in event_state_utils.hpp)	690
+event_timeline.cpp	A	real (191 lines)	5922
+event_timeline_helper.cpp	A	real (105 lines)	3467
+event_timestamp_utils.cpp	A	real (71 lines)	2074
+event_utils.cpp	A	real (480 lines)	17719
+event_validator.cpp	A	real (350 lines)	13710
+event_version_utils.cpp	A	real (4 lines)	288
+eventcache.cpp	A	real (99 lines)	3327
+eventdb.cpp	A	real (257 lines)	9615
+exporter.cpp	A	real (217 lines)	8292
+favorite_messages.cpp	A	real (157 lines)	6590
+federation_client.cpp	A	real (499 lines)	28859
+federation_tester.cpp	A	real (111 lines)	4504
+federation_v4.cpp	A	real (830 lines)	37119
+federation_version.cpp	A	real (79 lines)	2651
+file_upload_utils.cpp	C	broken header (9 garbage decls in file_upload_utils.hpp)	907
+file_v2.cpp	A	real (58 lines)	1189
+file_validator.cpp	A	real (161 lines)	6312
+filter_utils.cpp	C	size echo stub (3 json.size() calls, 6 lines)	677
+font_manager.cpp	A	real (152 lines)	6112
+gossip_manager.cpp	A	real (144 lines)	5923
+graph_utils.cpp	A	real (183 lines)	6026
+hash_utils.cpp	A	real (283 lines)	9047
+highlight_formatter.cpp	C	broken header (12 garbage decls in highlight_formatter.hpp)	921
+http_client.cpp	A	real (217 lines)	7096
+identity_hash.cpp	A	real (152 lines)	6474
+identity_lookup.cpp	A	real (166 lines)	6828
+identity_server.cpp	B	auto-generated template header	18650
+identity_server_lookup.cpp	A	real (153 lines)	6064
+identity_server_manager.cpp	A	real (406 lines)	14126
+identity_server_utils.cpp	A	real (57 lines)	2291
+identity_utils.cpp	A	real (188 lines)	5365
+identity_v4.cpp	A	real (830 lines)	37111
+ignore_utils.cpp	A	real (168 lines)	7025
+inbound_federation.cpp	B	auto-generated template header	18705
+input_tools.cpp	A	real (247 lines)	7874
+invitation_hide.cpp	A	real (103 lines)	3138
+invite_counter.cpp	C	size echo stub (4 json.size() calls, 7 lines)	910
+invite_utils.cpp	A	real (144 lines)	4508
+invite_validator.cpp	A	real (170 lines)	7063
+json_parser.cpp	A	real (64 lines)	2082
+jumptodate.cpp	A	real (111 lines)	3395
+key_backup.cpp	A	real (329 lines)	11674
+key_backup_manager.cpp	A	real (612 lines)	22186
+key_backup_mgr.cpp	A	real (499 lines)	29042
+key_backup_v4.cpp	A	real (830 lines)	37121
+key_export_utils.cpp	A	real (171 lines)	7100
+key_share.cpp	A	real (159 lines)	6447
+key_share_handler.cpp	B	auto-generated template header	18814
+key_verification_utils.cpp	A	real (141 lines)	6307
+keyshare.cpp	A	real (103 lines)	3991
+knock_utils.cpp	A	real (168 lines)	7022
+ktport_a.cpp	C	hash echo stub (40 std::hash calls, 327 lines)	10267
+ktport_b.cpp	C	hash echo stub (40 std::hash calls, 327 lines)	10267
+ktport_c.cpp	C	hash echo stub (40 std::hash calls, 327 lines)	10267
+ktport_d.cpp	C	hash echo stub (40 std::hash calls, 327 lines)	10267
+ktport_e.cpp	C	hash echo stub (40 std::hash calls, 327 lines)	10267
+ktport_f.cpp	C	hash echo stub (40 std::hash calls, 327 lines)	10267
+ktport_g.cpp	C	hash echo stub (40 std::hash calls, 327 lines)	10267
+lang_detect.cpp	A	real (320 lines)	11391
+language_switcher.cpp	A	real (165 lines)	6944
+latency_stats.cpp	A	real (158 lines)	5294
+lazy_loading_utils.cpp	A	real (156 lines)	6342
+lightweight_call.cpp	A	real (187 lines)	6766
+lightweight_settings.cpp	A	real (164 lines)	6274
+link_preview.cpp	A	real (132 lines)	4667
+link_preview_cache.cpp	C	size echo stub (4 json.size() calls, 7 lines)	900
+link_preview_utils.cpp	C	broken header (8 garbage decls in link_preview_utils.hpp)	898
+link_previewer.cpp	A	real (172 lines)	7207
+live_draft.cpp	A	real (76 lines)	2962
+live_location.cpp	A	real (734 lines)	26611
+llm.cpp	A	real (223 lines)	6743
+location_controller.cpp	B	auto-generated template header	18754
+location_share.cpp	A	real (169 lines)	7148
+location_sharing.cpp	A	real (214 lines)	7321
+location_utils.cpp	A	real (89 lines)	3575
+location_v2.cpp	A	real (58 lines)	1186
+location_v4.cpp	A	real (830 lines)	37109
+login_flow.cpp	A	real (288 lines)	10895
+login_token_util.cpp	A	real (168 lines)	7010
+login_utils.cpp	A	real (300 lines)	12193
+markdown.cpp	A	real (331 lines)	10547
+markdown_parser.cpp	A	real (190 lines)	8664
+markdown_utils.cpp	A	real (152 lines)	6900
+masquerade.cpp	A	real (48 lines)	1511
+matrix_api.cpp	A	real (318 lines)	12477
+matrix_error.cpp	A	real (155 lines)	8100
+matrix_error_handler.cpp	B	auto-generated template header	18721
+matrix_error_utils.cpp	C	broken header (9 garbage decls in matrix_error_utils.hpp)	504
+matrix_events.cpp	B	auto-generated template header	33628
+matrix_id_utils.cpp	A	real (168 lines)	6965
+matrix_patterns.cpp	A	real (186 lines)	6906
+media_compressor.cpp	A	real (138 lines)	5552
+media_config_utils.cpp	A	real (4 lines)	279
+media_download.cpp	A	real (150 lines)	6298
+media_filter.cpp	A	real (86 lines)	2694
+media_gallery.cpp	A	real (153 lines)	6045
+media_progress_utils.cpp	C	size echo stub (2 json.size() calls, 5 lines)	508
+media_scanner.cpp	A	real (159 lines)	6433
+media_thumbnailer.cpp	A	real (144 lines)	5940
+media_tools.cpp	B	auto-generated template header	32659
+media_upload_manager.cpp	A	real (322 lines)	12536
+media_upload_queue.cpp	C	size echo stub (4 json.size() calls, 7 lines)	890
+media_upload_v4.cpp	A	real (613 lines)	25727
+media_utils.cpp	A	real (119 lines)	4326
+media_utils_ext.cpp	C	broken header (14 garbage decls in media_utils_ext.hpp)	911
+media_utils_extra.cpp	A	real (0 lines)	0
+media_viewer.cpp	A	real (343 lines)	12302
+mega_0.cpp	C	hash echo stub (500 std::hash calls, 4007 lines)	140797
+mega_1.cpp	C	hash echo stub (500 std::hash calls, 4007 lines)	140797
+mega_10.cpp	C	hash echo stub (500 std::hash calls, 4007 lines)	142297
+mega_11.cpp	C	hash echo stub (500 std::hash calls, 4007 lines)	142297
+mega_12.cpp	C	hash echo stub (500 std::hash calls, 4007 lines)	142297
+mega_13.cpp	C	hash echo stub (500 std::hash calls, 4007 lines)	142297
+mega_14.cpp	C	hash echo stub (500 std::hash calls, 4007 lines)	142297
+mega_15.cpp	C	hash echo stub (500 std::hash calls, 4007 lines)	142297
+mega_16.cpp	C	hash echo stub (500 std::hash calls, 4007 lines)	142297
+mega_17.cpp	C	hash echo stub (500 std::hash calls, 4007 lines)	142297
+mega_18.cpp	C	hash echo stub (500 std::hash calls, 4007 lines)	142297
+mega_19.cpp	C	hash echo stub (500 std::hash calls, 4007 lines)	142297
+megolm_decryptor.cpp	A	real (209 lines)	7740
+megolm_utils.cpp	C	size echo stub (4 json.size() calls, 7 lines)	904
+megolm_v4.cpp	A	real (830 lines)	37124
+member_count_cache.cpp	A	real (144 lines)	5969
+member_list.cpp	C	broken header (6 garbage decls in member_list.hpp)	913
+membership_utils.cpp	A	real (270 lines)	10422
+mention_parser.cpp	A	real (107 lines)	3861
+mention_utils.cpp	C	size echo stub (2 json.size() calls, 5 lines)	481
+message_aggregator.cpp	A	real (74 lines)	2373
+message_content.cpp	A	real (456 lines)	19061
+message_content_utils.cpp	A	real (202 lines)	8117
+message_edit.cpp	A	real (172 lines)	7178
+message_edit_utils.cpp	C	broken header (7 garbage decls in message_edit_utils.hpp)	926
+message_encryption.cpp	C	broken header (6 garbage decls in message_encryption.hpp)	506
+message_extras.cpp	A	real (576 lines)	21208
+message_format_helper.cpp	C	broken header (12 garbage decls in message_format_helper.hpp)	933
+message_format_utils.cpp	A	real (118 lines)	4492
+message_hasher.cpp	A	real (162 lines)	7005
+message_link_utils.cpp	A	real (79 lines)	3167
+message_location.cpp	A	real (99 lines)	3157
+message_location_formatter.cpp	A	real (62 lines)	2155
+message_preview_utils.cpp	A	real (253 lines)	10341
+message_processor.cpp	B	auto-generated template header	18816
+message_queue.cpp	A	real (185 lines)	5257
+message_reply_utils.cpp	C	broken header (9 garbage decls in message_reply_utils.hpp)	730
+message_report_utils.cpp	C	size echo stub (4 json.size() calls, 7 lines)	916
+message_retry.cpp	A	real (256 lines)	9146
+message_retry_utils.cpp	A	real (11 lines)	479
+message_scheduler.cpp	A	real (139 lines)	5027
+message_search.cpp	C	broken header (7 garbage decls in message_search.hpp)	496
+message_searcher.cpp	A	real (135 lines)	5465
+message_send_queue.cpp	A	real (144 lines)	5892
+mime_type_utils.cpp	C	size echo stub (4 json.size() calls, 7 lines)	923
+module_loader.cpp	A	real (127 lines)	4162
+msg_encryption.cpp	A	real (499 lines)	29042
+mx_device.cpp	C	hash echo stub (35 std::hash calls, 285 lines)	10104
+mx_event.cpp	C	hash echo stub (35 std::hash calls, 285 lines)	9999
+mx_filter.cpp	C	hash echo stub (35 std::hash calls, 285 lines)	10104
+mx_key.cpp	C	hash echo stub (35 std::hash calls, 285 lines)	9789
+mx_power.cpp	C	hash echo stub (35 std::hash calls, 285 lines)	9999
+mx_redact.cpp	C	hash echo stub (35 std::hash calls, 285 lines)	10104
+mx_room.cpp	C	hash echo stub (35 std::hash calls, 285 lines)	9894
+mx_session.cpp	C	hash echo stub (35 std::hash calls, 285 lines)	10209
+mx_state.cpp	C	hash echo stub (35 std::hash calls, 285 lines)	9999
+mx_sync2.cpp	C	hash echo stub (35 std::hash calls, 285 lines)	9999
+network_monitor.cpp	A	real (150 lines)	5203
+network_stats.cpp	A	real (167 lines)	5794
+ngen_n1.cpp	C	hash echo stub (35 std::hash calls, 285 lines)	9369
+ngen_n10.cpp	C	hash echo stub (35 std::hash calls, 285 lines)	9474
+ngen_n11.cpp	C	hash echo stub (35 std::hash calls, 285 lines)	9474
+ngen_n12.cpp	C	hash echo stub (35 std::hash calls, 285 lines)	9474
+ngen_n13.cpp	C	hash echo stub (35 std::hash calls, 285 lines)	9474
+ngen_n14.cpp	C	hash echo stub (35 std::hash calls, 285 lines)	9474
+ngen_n15.cpp	C	hash echo stub (35 std::hash calls, 285 lines)	9474
+ngen_n16.cpp	C	hash echo stub (35 std::hash calls, 285 lines)	9474
+ngen_n17.cpp	C	hash echo stub (35 std::hash calls, 285 lines)	9474
+ngen_n18.cpp	C	hash echo stub (35 std::hash calls, 285 lines)	9474
+ngen_n19.cpp	C	hash echo stub (35 std::hash calls, 285 lines)	9474
+ngen_n2.cpp	C	hash echo stub (35 std::hash calls, 285 lines)	9369
+ngen_n20.cpp	C	hash echo stub (35 std::hash calls, 285 lines)	9474
+ngen_n3.cpp	C	hash echo stub (35 std::hash calls, 285 lines)	9369
+ngen_n4.cpp	C	hash echo stub (35 std::hash calls, 285 lines)	9369
+ngen_n5.cpp	C	hash echo stub (35 std::hash calls, 285 lines)	9369
+ngen_n6.cpp	C	hash echo stub (35 std::hash calls, 285 lines)	9369
+ngen_n7.cpp	C	hash echo stub (35 std::hash calls, 285 lines)	9369
+ngen_n8.cpp	C	hash echo stub (35 std::hash calls, 285 lines)	9369
+ngen_n9.cpp	C	hash echo stub (35 std::hash calls, 285 lines)	9369
+notif_analyzer.cpp	A	real (158 lines)	5250
+notif_format.cpp	A	real (73 lines)	2256
+notif_formatter.cpp	A	real (153 lines)	5242
+notif_handler.cpp	B	auto-generated template header	33416
+notif_mode.cpp	A	real (107 lines)	4276
+notif_priority.cpp	A	real (121 lines)	3679
+notif_settings.cpp	A	real (134 lines)	4140
+notification.cpp	A	real (137 lines)	4379
+notification_action_utils.cpp	A	real (73 lines)	3128
+notification_badge.cpp	A	real (165 lines)	6809
+notification_cleaner.cpp	A	real (159 lines)	6471
+notification_filter.cpp	C	broken header (14 garbage decls in notification_filter.hpp)	871
+notification_formatter.cpp	B	auto-generated template header	18752
+notification_group.cpp	A	real (165 lines)	6822
+notification_grouping.cpp	C	broken header (18 garbage decls in notification_grouping.hpp)	839
+notification_sound_utils.cpp	A	real (85 lines)	3422
+notification_summary.cpp	C	broken header (4 garbage decls in notification_summary.hpp)	711
+offline_cache.cpp	A	real (445 lines)	15683
+oidc_auth.cpp	A	real (339 lines)	11712
+oidc_manager.cpp	A	real (495 lines)	18052
+olm.cpp	A	real (413 lines)	14319
+olm_account_manager.cpp	A	real (111 lines)	4507
+olm_crypto_v4.cpp	A	real (830 lines)	37130
+olm_manager.cpp	B	auto-generated template header	18786
+olm_session.cpp	A	real (512 lines)	17890
+olm_session_utils.cpp	C	broken header (5 garbage decls in olm_session_utils.hpp)	708
+olm_utils.cpp	A	real (140 lines)	5708
+openid_token.cpp	A	real (81 lines)	2776
+openid_token_utils.cpp	A	real (168 lines)	7001
+otk_utils.cpp	A	real (153 lines)	6506
+pagination_utils.cpp	A	real (123 lines)	5247
+password_strength.cpp	A	real (55 lines)	2284
+password_validator.cpp	A	real (166 lines)	5778
+permalink.cpp	A	real (276 lines)	9498
+permalink_utils.cpp	A	real (73 lines)	2008
+permission_checker.cpp	A	real (124 lines)	5163
+permission_validator.cpp	A	real (170 lines)	7103
+pin_manager.cpp	A	real (315 lines)	10905
+pinned_events.cpp	A	real (131 lines)	4436
+poll_display.cpp	C	broken header (6 garbage decls in poll_display.hpp)	683
+poll_engine_v4.cpp	A	real (830 lines)	37113
+poll_manager.cpp	A	real (453 lines)	16312
+poll_utils.cpp	A	real (155 lines)	5373
+poll_v2.cpp	A	real (58 lines)	1188
+poll_vote_utils.cpp	C	broken header (13 garbage decls in poll_vote_utils.hpp)	282
+power_level_visualizer.cpp	A	real (166 lines)	6862
+power_levels.cpp	A	real (226 lines)	9276
+presence_monitor.cpp	C	broken header (11 garbage decls in presence_monitor.hpp)	440
+presence_sync.cpp	A	real (152 lines)	6138
+presence_tracker.cpp	A	real (499 lines)	28762
+presence_utils.cpp	A	real (163 lines)	5531
+presence_v4.cpp	A	real (830 lines)	37116
+profile_swiper.cpp	A	real (95 lines)	3138
+profile_utils.cpp	C	broken header (4 garbage decls in profile_utils.hpp)	935
+profiler.cpp	A	real (648 lines)	22019
+progressive_combined_1.cpp	A	real (2849 lines)	126014
+progressive_combined_2.cpp	A	real (2849 lines)	126014
+progressive_combined_3.cpp	A	real (2849 lines)	126014
+progressive_combined_4.cpp	A	real (2849 lines)	126014
+progressive_combined_5.cpp	A	real (2849 lines)	126014
+progressive_combined_6.cpp	A	real (2849 lines)	126014
+progressive_combined_7.cpp	A	real (2745 lines)	126850
+progressive_combined_8.cpp	A	real (2745 lines)	126850
+progressive_combined_9.cpp	A	real (2745 lines)	126850
+progressive_core.cpp	A	real (694 lines)	28390
+progressive_stubs.cpp	A	real (283 lines)	10426
+proxy.cpp	A	real (92 lines)	2802
+public_room_lister.cpp	A	real (166 lines)	6879
+push_analytics.cpp	A	real (138 lines)	5578
+push_condition.cpp	A	real (382 lines)	14365
+push_condition_utils.cpp	A	real (95 lines)	3880
+push_controller.cpp	B	auto-generated template header	18721
+push_gateway_utils.cpp	A	real (73 lines)	3124
+push_notif_utils.cpp	C	size echo stub (2 json.size() calls, 5 lines)	520
+push_rule_utils.cpp	A	real (98 lines)	4146
+push_rules.cpp	A	real (521 lines)	19414
+push_rules_v4.cpp	A	real (830 lines)	37115
+push_translator.cpp	A	real (163 lines)	6771
+push_utils.cpp	C	broken header (10 garbage decls in push_utils.hpp)	681
+push_v2.cpp	A	real (58 lines)	1194
+qr_code_utils.cpp	A	real (174 lines)	7370
+rainbow.cpp	A	real (101 lines)	2973
+rainbow_utils.cpp	C	broken header (5 garbage decls in rainbow_utils.hpp)	891
+ram_monitor.cpp	A	real (97 lines)	3766
+rate_limit_utils.cpp	C	size echo stub (4 json.size() calls, 7 lines)	902
+raw_service.cpp	A	real (142 lines)	4635
+reaction_aggregator.cpp	C	size echo stub (4 json.size() calls, 7 lines)	907
+reaction_controller.cpp	B	auto-generated template header	18769
+reaction_picker_utils.cpp	C	broken header (10 garbage decls in reaction_picker_utils.hpp)	8931
+reaction_sync.cpp	A	real (152 lines)	6151
+reaction_utils.cpp	A	real (158 lines)	5603
+reaction_v2.cpp	A	real (58 lines)	1186
+read_marker.cpp	A	real (140 lines)	5182
+read_marker_utils.cpp	C	broken header (8 garbage decls in read_marker_utils.hpp)	955
+read_receipt_controller.cpp	B	auto-generated template header	18797
+read_receipt_display.cpp	C	size echo stub (2 json.size() calls, 5 lines)	514
+read_receipt_formatter.cpp	A	real (174 lines)	6952
+read_receipt_mgr.cpp	A	real (499 lines)	29326
+read_receipt_utils.cpp	A	real (163 lines)	6750
+read_receipt_v4.cpp	A	real (830 lines)	37117
+read_receipts.cpp	A	real (129 lines)	3952
+read_receipts_utils.cpp	C	broken header (13 garbage decls in read_receipts_utils.hpp)	622
+read_tracker.cpp	A	real (159 lines)	6403
+recovery_utils.cpp	A	real (153 lines)	6577
+registration_flow.cpp	A	real (173 lines)	7319
+relation.cpp	A	real (81 lines)	2795
+relation_builder.cpp	A	real (0 lines)	0
+reply_utils.cpp	C	broken header (9 garbage decls in reply_utils.hpp)	909
+report_utils.cpp	A	real (141 lines)	4657
+room_access_control.cpp	A	real (160 lines)	7004
+room_activity.cpp	A	real (159 lines)	6453
+room_alias_utils.cpp	A	real (105 lines)	3333
+room_alias_validator.cpp	A	real (163 lines)	7070
+room_analytics.cpp	A	real (162 lines)	5402
+room_autocomplete.cpp	A	real (153 lines)	6094
+room_avatar_utils.cpp	C	size echo stub (4 json.size() calls, 7 lines)	925
+room_bridge_utils.cpp	A	real (172 lines)	7216
+room_child_utils.cpp	A	real (98 lines)	4148
+room_content.cpp	A	real (579 lines)	21651
+room_counter.cpp	A	real (361 lines)	11547
+room_create_utils.cpp	C	broken header (4 garbage decls in room_create_utils.hpp)	3673
+room_directory.cpp	A	real (165 lines)	5637
+room_directory_full.cpp	B	auto-generated template header	18770
+room_directory_manager.cpp	A	real (330 lines)	12130
+room_directory_utils.cpp	C	broken header (4 garbage decls in room_directory_utils.hpp)	691
+room_encryption.cpp	A	real (123 lines)	4598
+room_encryption_event_utils.cpp	A	real (25 lines)	995
+room_favorite_utils.cpp	A	real (10 lines)	632
+room_forgot_utils.cpp	A	real (172 lines)	7217
+room_guest_access_utils.cpp	C	size echo stub (3 json.size() calls, 6 lines)	710
+room_history_utils.cpp	C	size echo stub (2 json.size() calls, 5 lines)	524
+room_info.cpp	A	real (52 lines)	1677
+room_info_utils.cpp	C	broken header (7 garbage decls in room_info_utils.hpp)	493
+room_invite_utils.cpp	C	broken header (12 garbage decls in room_invite_utils.hpp)	718
+room_join_handler.cpp	A	real (499 lines)	28949
+room_join_rules_utils.cpp	A	real (55 lines)	2187
+room_join_utils.cpp	C	broken header (6 garbage decls in room_join_utils.hpp)	921
+room_kicker.cpp	A	real (169 lines)	7108
+room_knock_manager.cpp	A	real (163 lines)	7063
+room_knock_utils.cpp	C	size echo stub (2 json.size() calls, 5 lines)	494
+room_leave_utils.cpp	C	broken header (6 garbage decls in room_leave_utils.hpp)	7186
+room_list.cpp	A	real (158 lines)	5651
+room_manager.cpp	B	auto-generated template header	33672
+room_member_sorter.cpp	C	size echo stub (4 json.size() calls, 7 lines)	886
+room_member_utils.cpp	C	broken header (5 garbage decls in room_member_utils.hpp)	947
+room_mirror.cpp	A	real (180 lines)	6242
+room_mute.cpp	C	size echo stub (4 json.size() calls, 7 lines)	847
+room_mute_scheduler.cpp	A	real (165 lines)	6785
+room_name.cpp	A	real (220 lines)	8289
+room_notice_formatter.cpp	C	size echo stub (4 json.size() calls, 7 lines)	913
+room_notification_utils.cpp	A	real (97 lines)	3825
+room_parent_utils.cpp	A	real (98 lines)	4153
+room_permission_utils.cpp	C	broken header (7 garbage decls in room_permission_utils.hpp)	501
+room_permissions.cpp	A	real (155 lines)	6207
+room_permissions_manager.cpp	A	real (318 lines)	12122
+room_power_level_utils.cpp	A	real (142 lines)	4879
+room_powerlevel_utils.cpp	C	size echo stub (4 json.size() calls, 7 lines)	925
+room_preview.cpp	A	real (77 lines)	2945
+room_previewer.cpp	A	real (172 lines)	7208
+room_read_marker_utils.cpp	A	real (97 lines)	4248
+room_retention_utils.cpp	A	real (4 lines)	285
+room_role_utils.cpp	A	real (98 lines)	4161
+room_server_acl_utils.cpp	A	real (4 lines)	274
+room_settings_utils.cpp	C	size echo stub (4 json.size() calls, 7 lines)	947
+room_sidebar.cpp	A	real (144 lines)	5879
+room_sort.cpp	A	real (170 lines)	5919
+room_state.cpp	A	real (268 lines)	10772
+room_state_engine.cpp	B	auto-generated template header	18804
+room_state_event_utils.cpp	A	real (123 lines)	5170
+room_state_manager.cpp	A	real (197 lines)	7781
+room_stats.cpp	A	real (139 lines)	5570
+room_suggestions.cpp	A	real (153 lines)	6082
+room_summary.cpp	A	real (131 lines)	4228
+room_summary_formatter.cpp	A	real (176 lines)	6783
+room_summary_v4.cpp	A	real (830 lines)	37118
+room_tag_utils.cpp	A	real (121 lines)	5312
+room_tombstone.cpp	A	real (117 lines)	4131
+room_topic_utils.cpp	C	size echo stub (4 json.size() calls, 7 lines)	910
+room_type_detector.cpp	A	real (184 lines)	7945
+room_unread_utils.cpp	C	size echo stub (2 json.size() calls, 5 lines)	491
+room_upgrade.cpp	C	size echo stub (4 json.size() calls, 7 lines)	914
+room_upgrade_handler.cpp	B	auto-generated template header	18818
+room_upgrade_utils.cpp	A	real (169 lines)	7127
+room_upgrade_v4.cpp	A	real (613 lines)	25731
+room_upload_progress.cpp	A	real (4 lines)	293
+room_uploads.cpp	A	real (216 lines)	7681
+room_version.cpp	A	real (49 lines)	1650
+room_version_utils.cpp	C	size echo stub (2 json.size() calls, 5 lines)	510
+room_visibility_utils.cpp	A	real (104 lines)	4540
+round3_r1.cpp	C	hash echo stub (40 std::hash calls, 324 lines)	10684
+round3_r2.cpp	C	hash echo stub (40 std::hash calls, 324 lines)	10684
+round3_r3.cpp	C	hash echo stub (40 std::hash calls, 324 lines)	10684
+round3_r4.cpp	C	hash echo stub (40 std::hash calls, 324 lines)	10684
+round3_r5.cpp	C	hash echo stub (40 std::hash calls, 324 lines)	10684
+round3_r6.cpp	C	hash echo stub (40 std::hash calls, 324 lines)	10684
+round3_r7.cpp	C	hash echo stub (40 std::hash calls, 324 lines)	10684
+round3_r8.cpp	C	hash echo stub (40 std::hash calls, 324 lines)	10684
+round3_r9.cpp	C	hash echo stub (40 std::hash calls, 324 lines)	10684
+round3_ra.cpp	C	hash echo stub (40 std::hash calls, 324 lines)	10684
+round3_rb.cpp	C	hash echo stub (40 std::hash calls, 324 lines)	10684
+round3_rc.cpp	C	hash echo stub (40 std::hash calls, 324 lines)	10684
+round3_rd.cpp	C	hash echo stub (40 std::hash calls, 324 lines)	10684
+round3_re.cpp	C	hash echo stub (40 std::hash calls, 324 lines)	10684
+round3_rf.cpp	C	hash echo stub (40 std::hash calls, 324 lines)	10684
+sas_emoji_utils.cpp	A	real (26 lines)	1527
+sas_manager.cpp	B	auto-generated template header	18704
+sas_verification.cpp	A	real (212 lines)	7549
+sas_verification_utils.cpp	C	size echo stub (3 json.size() calls, 6 lines)	701
+scheduled_edit.cpp	A	real (249 lines)	8497
+sdk_port_01.cpp	A	real (462 lines)	18202
+sdk_port_02.cpp	A	real (462 lines)	18202
+sdk_port_03.cpp	A	real (462 lines)	18202
+sdk_port_04.cpp	A	real (462 lines)	18202
+sdk_port_05.cpp	A	real (462 lines)	18202
+sdk_port_06.cpp	A	real (462 lines)	18202
+sdk_port_07.cpp	A	real (462 lines)	18202
+sdk_port_08.cpp	A	real (462 lines)	18202
+sdk_port_09.cpp	A	real (462 lines)	18202
+sdk_port_10.cpp	A	real (462 lines)	18203
+sdk_port_11.cpp	A	real (462 lines)	18203
+sdk_port_12.cpp	A	real (462 lines)	18203
+sdk_port_13.cpp	A	real (462 lines)	18203
+sdk_port_14.cpp	A	real (462 lines)	18203
+sdk_port_15.cpp	A	real (712 lines)	33099
+sdk_port_16.cpp	A	real (712 lines)	33099
+sdk_port_17.cpp	A	real (712 lines)	33099
+sdk_port_18.cpp	A	real (712 lines)	33099
+sdk_port_19.cpp	A	real (712 lines)	33099
+sdk_port_20.cpp	A	real (712 lines)	33099
+sdk_port_21.cpp	A	real (712 lines)	33099
+sdk_port_22.cpp	A	real (712 lines)	33099
+sdk_port_23.cpp	A	real (712 lines)	33099
+sdk_port_24.cpp	A	real (712 lines)	33099
+sdk_port_25.cpp	A	real (712 lines)	33099
+sdk_port_26.cpp	A	real (712 lines)	33099
+sdk_port_27.cpp	A	real (712 lines)	33099
+sdk_port_28.cpp	A	real (712 lines)	33099
+sdkport_0.cpp	C	hash echo stub (25 std::hash calls, 182 lines)	6157
+sdkport_1.cpp	C	hash echo stub (25 std::hash calls, 182 lines)	6157
+sdkport_2.cpp	C	hash echo stub (25 std::hash calls, 182 lines)	6157
+sdkport_3.cpp	C	hash echo stub (25 std::hash calls, 182 lines)	6157
+sdkport_4.cpp	C	hash echo stub (25 std::hash calls, 182 lines)	6157
+sdkport_5.cpp	C	hash echo stub (25 std::hash calls, 182 lines)	6157
+sdkport_6.cpp	C	hash echo stub (25 std::hash calls, 182 lines)	6157
+sdkport_7.cpp	C	hash echo stub (25 std::hash calls, 182 lines)	6157
+sdkport_8.cpp	C	hash echo stub (25 std::hash calls, 182 lines)	6157
+sdkport_9.cpp	C	hash echo stub (25 std::hash calls, 182 lines)	6157
+sdkport_h.cpp	C	hash echo stub (25 std::hash calls, 182 lines)	6157
+sdkport_i.cpp	C	hash echo stub (25 std::hash calls, 182 lines)	6157
+sdkport_j.cpp	C	hash echo stub (25 std::hash calls, 182 lines)	6157
+sdkport_k.cpp	C	hash echo stub (25 std::hash calls, 182 lines)	6157
+sdkport_l.cpp	C	hash echo stub (25 std::hash calls, 182 lines)	6157
+sdkport_m.cpp	C	hash echo stub (25 std::hash calls, 182 lines)	6157
+sdkport_n.cpp	C	hash echo stub (25 std::hash calls, 182 lines)	6157
+sdkport_o.cpp	C	hash echo stub (25 std::hash calls, 182 lines)	6157
+sdkport_p.cpp	C	hash echo stub (25 std::hash calls, 182 lines)	6157
+sdkport_q.cpp	C	hash echo stub (25 std::hash calls, 182 lines)	6157
+sdkport_r.cpp	C	hash echo stub (25 std::hash calls, 182 lines)	6157
+sdkport_s.cpp	C	hash echo stub (25 std::hash calls, 182 lines)	6157
+sdkport_t.cpp	C	hash echo stub (25 std::hash calls, 182 lines)	6157
+sdkport_u.cpp	C	hash echo stub (25 std::hash calls, 182 lines)	6157
+sdkport_v.cpp	C	hash echo stub (25 std::hash calls, 182 lines)	6157
+sdkport_w.cpp	C	hash echo stub (25 std::hash calls, 182 lines)	6157
+sdkport_x.cpp	C	hash echo stub (25 std::hash calls, 182 lines)	6157
+sdkport_y.cpp	C	hash echo stub (25 std::hash calls, 182 lines)	6157
+sdkport_z.cpp	C	hash echo stub (25 std::hash calls, 182 lines)	6157
+search_controller.cpp	B	auto-generated template header	18769
+search_engine.cpp	A	real (52 lines)	2002
+search_index.cpp	B	auto-generated template header	33521
+search_utils.cpp	A	real (148 lines)	6259
+secret_sharing.cpp	A	real (172 lines)	7227
+secret_storage_utils.cpp	A	real (148 lines)	6275
+secret_store_v4.cpp	A	real (830 lines)	37125
+secrets_utils.cpp	C	size echo stub (3 json.size() calls, 6 lines)	670
+section_sort_utils.cpp	C	size echo stub (4 json.size() calls, 7 lines)	888
+send_queue_v4.cpp	A	real (830 lines)	37114
+sender_notif_filter.cpp	A	real (199 lines)	7148
+server_acronym_utils.cpp	C	size echo stub (2 json.size() calls, 5 lines)	490
+server_capabilities.cpp	A	real (236 lines)	9835
+server_discovery.cpp	A	real (55 lines)	2295
+server_notice_manager.cpp	A	real (642 lines)	25031
+server_notice_utils.cpp	A	real (38 lines)	1164
+server_notice_v4.cpp	A	real (613 lines)	25729
+server_support.cpp	A	real (164 lines)	6695
+server_version_check.cpp	C	size echo stub (4 json.size() calls, 7 lines)	928
+session_backup.cpp	C	size echo stub (4 json.size() calls, 7 lines)	896
+session_export.cpp	A	real (143 lines)	5859
+session_info_utils.cpp	A	real (75 lines)	2851
+session_lifecycle_utils.cpp	C	size echo stub (3 json.size() calls, 6 lines)	720
+session_manager.cpp	A	real (143 lines)	5293
+session_manager_full.cpp	A	real (365 lines)	12319
+session_metadata_utils.cpp	A	real (169 lines)	7177
+session_restore.cpp	C	size echo stub (3 json.size() calls, 6 lines)	696
+session_signout.cpp	A	real (159 lines)	6469
+session_timeout.cpp	A	real (154 lines)	5125
+session_watchdog.cpp	A	real (124 lines)	5147
+signout_service.cpp	A	real (151 lines)	5194
+slash_command.cpp	A	real (583 lines)	23329
+sliding_sync.cpp	A	real (330 lines)	14258
+sliding_sync_manager.cpp	B	auto-generated template header	18715
+sliding_sync_utils.cpp	C	size echo stub (3 json.size() calls, 6 lines)	721
+sliding_sync_v4.cpp	A	real (830 lines)	37114
+smart_reply.cpp	A	real (130 lines)	5236
+space_controller.cpp	B	auto-generated template header	18697
+space_graph.cpp	A	real (572 lines)	20936
+space_graph_v4.cpp	A	real (830 lines)	37118
+space_hierarchy.cpp	A	real (499 lines)	28575
+space_navigation.cpp	C	size echo stub (3 json.size() calls, 6 lines)	717
+space_utils.cpp	A	real (154 lines)	5463
+spellcheck.cpp	A	real (256 lines)	7725
+spellcheck_utils.cpp	A	real (143 lines)	5824
+spoiler_manager.cpp	A	real (217 lines)	8695
+spoiler_utils.cpp	A	real (51 lines)	1606
+spotlight_search_utils.cpp	A	real (153 lines)	6052
+sqlite_store.cpp	A	real (1200 lines)	49666
+sqlite_wrapper.cpp	A	real (363 lines)	14720
+sso_auth.cpp	A	real (499 lines)	28991
+sso_handler.cpp	A	real (176 lines)	7520
+sso_provider_utils.cpp	C	size echo stub (4 json.size() calls, 7 lines)	892
+sso_utils.cpp	A	real (189 lines)	6300
+state_resolver.cpp	A	real (143 lines)	5840
+string_order.cpp	A	real (253 lines)	8552
+string_utils.cpp	A	real (356 lines)	13252
+svg_draw.cpp	A	real (235 lines)	7748
+sync_analyzer.cpp	A	real (249 lines)	9047
+sync_engine.cpp	B	auto-generated template header	32145
+sync_filter.cpp	A	real (233 lines)	6848
+sync_filter_utils.cpp	C	size echo stub (4 json.size() calls, 7 lines)	905
+sync_handler.cpp	A	real (567 lines)	19330
+sync_handler_v4.cpp	A	real (830 lines)	37121
+sync_models.cpp	A	real (372 lines)	13723
+sync_optimizer.cpp	A	real (159 lines)	6446
+sync_response_parser.cpp	B	auto-generated template header	18852
+sync_scheduler.cpp	A	real (159 lines)	6445
+sync_state_monitor.cpp	A	real (159 lines)	6419
+sync_state_utils.cpp	A	real (13 lines)	614
+sync_status_utils.cpp	A	real (127 lines)	4678
+sync_summary_utils.cpp	A	real (4 lines)	279
+sync_utils.cpp	A	real (152 lines)	4562
+tag_manager.cpp	C	size echo stub (4 json.size() calls, 7 lines)	865
+task_queue.cpp	A	real (144 lines)	5868
+terms_manager.cpp	A	real (210 lines)	7316
+terms_service.cpp	A	real (347 lines)	14942
+test_provider.cpp	A	real (146 lines)	8498
+text_formats.cpp	A	real (123 lines)	3943
+text_stats.cpp	A	real (33 lines)	1095
+text_undo_manager.cpp	A	real (198 lines)	6194
+theme_manager.cpp	A	real (172 lines)	7187
+thirdparty_invite.cpp	A	real (172 lines)	7277
+thirdparty_utils.cpp	A	real (136 lines)	6030
+thread_aggregator.cpp	A	real (168 lines)	5824
+thread_controller.cpp	B	auto-generated template header	18761
+thread_manager.cpp	A	real (413 lines)	14083
+thread_mgr_v4.cpp	A	real (830 lines)	37118
+thread_summary.cpp	A	real (159 lines)	6452
+thread_utils.cpp	A	real (148 lines)	6267
+three_pid_utils.cpp	C	size echo stub (2 json.size() calls, 5 lines)	489
+thumbnail.cpp	A	real (114 lines)	3922
+thumbnail_utils.cpp	A	real (126 lines)	5333
+timeline_chunk.cpp	A	real (542 lines)	16999
+timeline_chunk_v4.cpp	A	real (830 lines)	37124
+timeline_controller.cpp	B	auto-generated template header	18792
+timeline_filter_utils.cpp	A	real (172 lines)	7239
+timeline_render_utils.cpp	C	size echo stub (2 json.size() calls, 5 lines)	513
+timeline_state_utils.cpp	A	real (21 lines)	977
+timeline_utils.cpp	A	real (148 lines)	4894
+tls_bridge_stub.cpp	A	real (25 lines)	914
+toast_notification_utils.cpp	A	real (97 lines)	3799
+topic_parser.cpp	A	real (179 lines)	7603
+translate.cpp	A	real (90 lines)	2974
+translation_utils.cpp	C	size echo stub (4 json.size() calls, 7 lines)	925
+transparent_overlay.cpp	A	real (388 lines)	15185
+typing_handler.cpp	A	real (499 lines)	28715
+typing_indicator.cpp	A	real (169 lines)	7137
+typing_monitor.cpp	A	real (110 lines)	3655
+typing_sender.cpp	C	size echo stub (4 json.size() calls, 7 lines)	883
+typing_utils.cpp	A	real (84 lines)	2961
+tz_auth.cpp	C	hash echo stub (30 std::hash calls, 250 lines)	8346
+tz_backup.cpp	C	hash echo stub (30 std::hash calls, 250 lines)	8526
+tz_bridge.cpp	C	hash echo stub (30 std::hash calls, 250 lines)	8526
+tz_cache.cpp	C	hash echo stub (30 std::hash calls, 250 lines)	8436
+tz_cfg.cpp	C	hash echo stub (30 std::hash calls, 250 lines)	8256
+tz_db.cpp	C	hash echo stub (30 std::hash calls, 250 lines)	8166
+tz_e2ee.cpp	C	hash echo stub (30 std::hash calls, 250 lines)	8346
+tz_evt.cpp	C	hash echo stub (30 std::hash calls, 250 lines)	8256
+tz_http.cpp	C	hash echo stub (30 std::hash calls, 250 lines)	8346
+tz_log.cpp	C	hash echo stub (30 std::hash calls, 250 lines)	8256
+tz_media.cpp	C	hash echo stub (30 std::hash calls, 250 lines)	8436
+tz_msg.cpp	C	hash echo stub (30 std::hash calls, 250 lines)	8256
+tz_notif.cpp	C	hash echo stub (30 std::hash calls, 250 lines)	8436
+tz_room.cpp	C	hash echo stub (30 std::hash calls, 250 lines)	8346
+tz_search.cpp	C	hash echo stub (30 std::hash calls, 250 lines)	8526
+tz_space.cpp	C	hash echo stub (30 std::hash calls, 250 lines)	8436
+tz_sync.cpp	C	hash echo stub (30 std::hash calls, 250 lines)	8346
+tz_thread.cpp	C	hash echo stub (30 std::hash calls, 250 lines)	8526
+tz_user.cpp	C	hash echo stub (30 std::hash calls, 250 lines)	8346
+tz_widget.cpp	C	hash echo stub (30 std::hash calls, 250 lines)	8526
+unified_push.cpp	A	real (212 lines)	7992
+url_preview.cpp	A	real (225 lines)	8095
+url_preview_formatter.cpp	C	size echo stub (2 json.size() calls, 5 lines)	497
+url_preview_parser.cpp	C	size echo stub (3 json.size() calls, 6 lines)	723
+url_preview_utils.cpp	A	real (111 lines)	4934
+url_render_utils.cpp	A	real (75 lines)	2855
+url_tools.cpp	A	real (181 lines)	5237
+user_badge_utils.cpp	A	real (165 lines)	6779
+user_block_manager.cpp	A	real (159 lines)	6406
+user_directory.cpp	A	real (289 lines)	9324
+user_directory_formatter.cpp	A	real (75 lines)	2875
+user_directory_search.cpp	C	size echo stub (4 json.size() calls, 7 lines)	897
+user_invite_utils.cpp	A	real (21 lines)	907
+user_mask.cpp	A	real (124 lines)	3839
+user_messages.cpp	A	real (71 lines)	2257
+user_profile.cpp	A	real (84 lines)	3220
+user_profiles.cpp	B	auto-generated template header	33416
+user_rating.cpp	A	real (169 lines)	5872
+user_report_utils.cpp	A	real (122 lines)	4886
+user_search_utils.cpp	A	real (23 lines)	1194
+user_status.cpp	A	real (156 lines)	5396
+user_status_message_utils.cpp	C	size echo stub (2 json.size() calls, 5 lines)	503
+username_validator.cpp	A	real (144 lines)	4673
+verification_request_utils.cpp	A	real (166 lines)	6888
+verification_utils.cpp	A	real (156 lines)	6461
+verification_v4.cpp	A	real (830 lines)	37113
+voice_broadcast.cpp	A	real (496 lines)	18901
+voice_broadcast_ctrl.cpp	B	auto-generated template header	18810
+voice_broadcast_manager.cpp	A	real (153 lines)	6084
+voice_broadcast_utils.cpp	A	real (129 lines)	5650
+voice_broadcast_v4.cpp	A	real (830 lines)	37116
+voice_message_utils.cpp	A	real (172 lines)	7192
+waveform.cpp	A	real (192 lines)	6221
+weather_utils.cpp	A	real (165 lines)	5754
+web_search.cpp	A	real (393 lines)	14464
+webrtc_utils.cpp	A	real (161 lines)	5963
+well_known.cpp	A	real (184 lines)	7054
+wellknown_helper.cpp	C	size echo stub (3 json.size() calls, 6 lines)	703
+whois_utils.cpp	A	real (75 lines)	2838
+widget_api_utils.cpp	A	real (168 lines)	7000
+widget_controller.cpp	B	auto-generated template header	18785
+widget_driver_v4.cpp	A	real (830 lines)	37116
+widget_event_utils.cpp	C	size echo stub (3 json.size() calls, 6 lines)	705
+widget_host.cpp	A	real (499 lines)	28052
+widget_manager.cpp	A	real (671 lines)	24366
+widget_manager_ext.cpp	A	real (171 lines)	7128
+widget_permission_utils.cpp	C	size echo stub (3 json.size() calls, 6 lines)	714
+widget_url_check.cpp	A	real (162 lines)	7011
+widget_utils.cpp	A	real (137 lines)	4841
+yggdrasil.cpp	A	real (91 lines)	2710

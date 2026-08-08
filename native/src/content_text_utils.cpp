@@ -11,7 +11,7 @@ static const char* SPOILER_SPAN_START = "<span data-mx-spoiler";
 static const char* SPOILER_SPAN_END = "</span>";
 static const char* SPOILER_CHAR = "\xE2\x96\x88"; // █ U+2588 UTF-8
 
-std::string extractUsefulTextFromReply(const std::string& repliedBody) {
+inline std::string extractUsefulTextFromReply(const std::string& repliedBody) {
     // Original Kotlin:
     //   val lines = repliedBody.lines()
     //   var wellFormed = repliedBody.startsWith(">")
@@ -109,7 +109,7 @@ std::string ensureCorrectFormattedBody(const std::string& newBody,
     return newFormattedBody;
 }
 
-std::string formatSpoilerTextFromHtml(const std::string& formattedBody) {
+inline std::string formatSpoilerTextFromHtml(const std::string& formattedBody) {
     // Original Kotlin:
     //   formattedBody
     //       .replace("(?<=<span data-mx-spoiler)=\\\".+?\\\">".toRegex(), ">")

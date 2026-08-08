@@ -100,7 +100,7 @@ std::string buildHistoryVisibilityEvent(const std::string& json) {
     return o.str();
 }
 
-std::string buildJoinRulesEvent(const std::string& json) {
+inline std::string buildJoinRulesEvent(const std::string& json) {
     if (json.empty()) return R"({"ok":false,"error":"empty input","fn":"buildJoinRulesEvent"})";
     
     std::string type = parseJsonStringValue(json, "type");

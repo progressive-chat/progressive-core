@@ -12,7 +12,7 @@ namespace progressive {
 
 // ---- content_utils free functions (real implementations) ----
 
-std::string buildMxcUri(const std::string& serverName, const std::string& mediaId) {
+inline std::string buildMxcUri(const std::string& serverName, const std::string& mediaId) {
     return "mxc://" + serverName + "/" + mediaId;
 }
 
@@ -37,7 +37,7 @@ std::string ensureCorrectFormattedBodyInTextReply(const std::string& repliedEven
     return fallback + originalBody;
 }
 
-std::string extractUsefulTextFromReply(const std::string& repliedBody) {
+inline std::string extractUsefulTextFromReply(const std::string& repliedBody) {
     if (repliedBody.empty()) return "";
     std::string result;
     bool inTag = false;
@@ -57,7 +57,7 @@ std::string extractUsefulTextFromReply(const std::string& repliedBody) {
     return result;
 }
 
-std::string formatSpoilerTextFromHtml(const std::string& formattedBody) {
+inline std::string formatSpoilerTextFromHtml(const std::string& formattedBody) {
     std::string result;
     bool inTag = false;
     bool inSpoiler = false;
@@ -87,7 +87,7 @@ std::string formatSpoilerTextFromHtml(const std::string& formattedBody) {
     return result;
 }
 
-std::string getEditedTargetEventId(const std::string& contentJson) {
+inline std::string getEditedTargetEventId(const std::string& contentJson) {
     auto pos = contentJson.find("\"m.relates_to\"");
     if (pos == std::string::npos) return "";
     auto eventPos = contentJson.find("\"event_id\"", pos);
@@ -99,7 +99,7 @@ std::string getEditedTargetEventId(const std::string& contentJson) {
     return contentJson.substr(start + 1, end - start - 1);
 }
 
-std::string getExtensionFromMimeType(const std::string& mimetype) {
+inline std::string getExtensionFromMimeType(const std::string& mimetype) {
     if (mimetype == "image/jpeg") return ".jpg";
     if (mimetype == "image/png")  return ".png";
     if (mimetype == "image/gif")  return ".gif";
@@ -118,7 +118,7 @@ std::string getExtensionFromMimeType(const std::string& mimetype) {
     return "";
 }
 
-std::string getLatestEditEventId(const std::string& editSummaryJson, const std::string& originalEventId) {
+inline std::string getLatestEditEventId(const std::string& editSummaryJson, const std::string& originalEventId) {
     auto pos = editSummaryJson.find("\"latest_event_id\"");
     if (pos == std::string::npos) return originalEventId;
     auto start = editSummaryJson.find('"', pos + 18);
@@ -128,7 +128,7 @@ std::string getLatestEditEventId(const std::string& editSummaryJson, const std::
     return editSummaryJson.substr(start + 1, end - start - 1);
 }
 
-bool hasTextWithImage(const std::string& contentJson) {
+inline bool hasTextWithImage(const std::string& contentJson) {
     auto bodyPos = contentJson.find("\"body\"");
     if (bodyPos == std::string::npos) return false;
     auto msgTypePos = contentJson.find("\"msgtype\"");
@@ -144,7 +144,7 @@ bool hasTextWithImage(const std::string& contentJson) {
     return !body.empty();
 }
 
-std::string normalizeMimeType(const std::string& mimeType) {
+inline std::string normalizeMimeType(const std::string& mimeType) {
     if (mimeType.empty()) return mimeType;
     auto slash = mimeType.find('/');
     if (slash == std::string::npos) return mimeType;

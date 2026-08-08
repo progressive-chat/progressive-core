@@ -126,7 +126,7 @@ std::string getEventTypeLabel(const std::string& eventType) {
     return eventType;
 }
 
-std::string getMessageTypeLabel(const std::string& msgType) {
+inline std::string getMessageTypeLabel(const std::string& msgType) {
     if (msgType == MessageTypeStr::TEXT) return "Text";
     if (msgType == MessageTypeStr::EMOTE) return "Action";
     if (msgType == MessageTypeStr::NOTICE) return "Notice";

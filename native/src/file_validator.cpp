@@ -94,7 +94,7 @@ bool isAudioMime(const std::string& mimeType) {
     return mimeType.rfind("audio/", 0) == 0;
 }
 
-std::string formatFileSize(int64_t bytes) {
+inline std::string formatFileSize(int64_t bytes) {
     if (bytes < 1024) return std::to_string(bytes) + " B";
     double kb = bytes / 1024.0;
     if (kb < 1024) {

@@ -1,0 +1,3 @@
+/tmp/opencode/progressive-core/build2/_deps/simdjson-subbuild/CMakeFiles/simdjson-populate.dir
+/tmp/opencode/progressive-core/build2/_deps/simdjson-subbuild/CMakeFiles/edit_cache.dir
+/tmp/opencode/progressive-core/build2/_deps/simdjson-subbuild/CMakeFiles/rebuild_cache.dir

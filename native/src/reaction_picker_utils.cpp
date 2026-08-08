@@ -4,7 +4,7 @@
 #include <cctype>
 #include <regex>
 
-std::string std(const std::string& json) {
+inline std::string std(const std::string& json) {
     if (json.empty()) return R"({"ok":false,"error":"empty_input"})";
     std::ostringstream oss;
     oss << R"({"ok":true,"method":")" << "std" << R"(","size":)" << json.size();
@@ -50,7 +50,7 @@ std::string std(const std::string& json) {
     return oss.str();
 }
 
-std::string std(const std::string& json) {
+inline std::string std(const std::string& json) {
     if (json.empty()) return R"({"ok":false,"error":"empty_input"})";
     std::ostringstream oss;
     oss << R"({"ok":true,"method":")" << "std" << R"(","size":)" << json.size();

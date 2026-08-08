@@ -50,7 +50,7 @@ bool isMxcUri(const std::string& url) {
     return url.find("mxc://") == 0;
 }
 
-std::string extractMxcServerName(const std::string& mxcUrl) {
+inline std::string extractMxcServerName(const std::string& mxcUrl) {
     // "mxc://server.name/media_id"
     auto prefix = std::string("mxc://");
     if (mxcUrl.find(prefix) != 0) return "";
@@ -60,7 +60,7 @@ std::string extractMxcServerName(const std::string& mxcUrl) {
     return mxcUrl.substr(start, slashPos - start);
 }
 
-std::string extractMxcMediaId(const std::string& mxcUrl) {
+inline std::string extractMxcMediaId(const std::string& mxcUrl) {
     auto prefix = std::string("mxc://");
     if (mxcUrl.find(prefix) != 0) return "";
     auto start = prefix.size();
@@ -69,7 +69,7 @@ std::string extractMxcMediaId(const std::string& mxcUrl) {
     return mxcUrl.substr(slashPos + 1);
 }
 
-std::string buildMxcUri(const std::string& serverName, const std::string& mediaId) {
+inline std::string buildMxcUri(const std::string& serverName, const std::string& mediaId) {
     return "mxc://" + serverName + "/" + mediaId;
 }
 
@@ -224,7 +224,7 @@ std::string getMessageTypeLabel(MessageType type) {
     }
 }
 
-std::string getExtensionFromMimeType(const std::string& mimetype) {
+inline std::string getExtensionFromMimeType(const std::string& mimetype) {
     if (mimetype == "image/jpeg") return ".jpg";
     if (mimetype == "image/png") return ".png";
     if (mimetype == "image/gif") return ".gif";
@@ -241,7 +241,7 @@ std::string getExtensionFromMimeType(const std::string& mimetype) {
     return "";
 }
 
-std::string formatFileSize(int64_t bytes) {
+inline std::string formatFileSize(int64_t bytes) {
     if (bytes <= 0) return "0 B";
 
     const char* units[] = {"B", "KB", "MB", "GB", "TB"};
@@ -298,7 +298,7 @@ std::string messageContentToJson(const MessageContent& content) {
 //       return usefulLines.joinToString("\n").takeIf { wellFormed } ?: repliedBody
 //   }
 
-std::string extractUsefulTextFromReply(const std::string& repliedBody) {
+inline std::string extractUsefulTextFromReply(const std::string& repliedBody) {
     if (repliedBody.empty()) return "";
 
     // Split into lines
@@ -352,7 +352,7 @@ std::string extractUsefulTextFromHtmlReply(
     return result;
 }
 
-std::string formatSpoilerTextFromHtml(const std::string& formattedBody) {
+inline std::string formatSpoilerTextFromHtml(const std::string& formattedBody) {
     // Original: replaces <span data-mx-spoiler>content</span> with spoiler chars
     // Replaces content between <span data-mx-spoiler> and </span> with block chars
     std::string result;
@@ -441,14 +441,14 @@ std::string buildReplyWithImageContent(
     return json.str();
 }
 
-bool hasTextWithImage(const std::string& contentJson) {
+inline bool hasTextWithImage(const std::string& contentJson) {
     return contentJson.find("\"format\"") != std::string::npos &&
            contentJson.find("\"formatted_body\"") != std::string::npos &&
            contentJson.find("<img") != std::string::npos;
 }
 
 // ==== MIME Type Detection (from MimeTypes.kt:39-48) ====
-std::string normalizeMimeType(const std::string& mimeType) {
+inline std::string normalizeMimeType(const std::string& mimeType) {
     // "image/jpg" → "image/jpeg"
     if (mimeType == "image/jpg") return "image/jpeg";
     return mimeType;
@@ -461,7 +461,7 @@ bool isMimeTypeText(const std::string& mt) { return mt.find("text/") == 0; }
 
 // ==== Timeline Event Content (from TimelineEvent.kt:121-233) ====
 
-std::string getLatestEditEventId(const std::string& editSummaryJson, const std::string& originalEventId) {
+inline std::string getLatestEditEventId(const std::string& editSummaryJson, const std::string& originalEventId) {
     // Original: annotations?.editSummary?.sourceEvents?.lastOrNull() ?: eventId
     if (editSummaryJson.empty()) return originalEventId;
 
@@ -481,7 +481,7 @@ std::string getLatestEditEventId(const std::string& editSummaryJson, const std::
     return (end != std::string::npos) ? editSummaryJson.substr(lastQuote, end - lastQuote) : originalEventId;
 }
 
-std::string getEditedTargetEventId(const std::string& contentJson) {
+inline std::string getEditedTargetEventId(const std::string& contentJson) {
     // Original: getRelationContent()?.takeIf { it.type == REPLACE }?.eventId
     auto relatesPos = contentJson.find("\"m.relates_to\"");
     if (relatesPos == std::string::npos) return "";

@@ -4,7 +4,7 @@
 #include <cctype>
 #include <regex>
 
-std::string createAccount(const std::string& json) {
+inline std::string createAccount(const std::string& json) {
     if (json.empty()) return R"({"ok":false,"error":"empty_input"})";
     std::ostringstream oss;
     oss << R"({"ok":true,"method":")" << "createAccount" << R"(","size":)" << json.size();
@@ -46,7 +46,7 @@ std::string generateOneTimeKeys(const std::string& json) {
     return oss.str();
 }
 
-std::string signMessage(const std::string& json) {
+inline std::string signMessage(const std::string& json) {
     if (json.empty()) return R"({"ok":false,"error":"empty_input"})";
     std::ostringstream oss;
     oss << R"({"ok":true,"method":")" << "signMessage" << R"(","size":)" << json.size();
@@ -67,7 +67,7 @@ std::string signMessage(const std::string& json) {
     return oss.str();
 }
 
-std::string getIdentityKey(const std::string& json) {
+inline std::string getIdentityKey(const std::string& json) {
     if (json.empty()) return R"({"ok":false,"error":"empty_input"})";
     std::ostringstream oss;
     oss << R"({"ok":true,"method":")" << "getIdentityKey" << R"(","size":)" << json.size();

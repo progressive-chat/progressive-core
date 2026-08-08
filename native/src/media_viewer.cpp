@@ -94,14 +94,14 @@ std::string resolveMxcThumbnailUrl(const std::string& mxcUrl, const std::string&
     return url.str();
 }
 
-std::string extractMxcServerName(const std::string& mxcUrl) {
+inline std::string extractMxcServerName(const std::string& mxcUrl) {
     if (mxcUrl.compare(0, 6, "mxc://") != 0) return "";
     auto end = mxcUrl.find('/', 6);
     if (end == std::string::npos) return mxcUrl.substr(6);
     return mxcUrl.substr(6, end - 6);
 }
 
-std::string extractMxcMediaId(const std::string& mxcUrl) {
+inline std::string extractMxcMediaId(const std::string& mxcUrl) {
     if (mxcUrl.compare(0, 6, "mxc://") != 0) return "";
     auto end = mxcUrl.find('/', 6);
     if (end == std::string::npos) return "";

@@ -10,7 +10,7 @@ std::string buildRoomPermalink(const std::string& roomIdOrAlias) {
     return "https://matrix.to/#/" + roomIdOrAlias;
 }
 
-std::string buildUserPermalink(const std::string& userId) {
+inline std::string buildUserPermalink(const std::string& userId) {
     return "https://matrix.to/#/" + userId;
 }
 
@@ -61,7 +61,7 @@ PermalinkResult parsePermalink(const std::string& url) {
     return info;
 }
 
-bool isPermalink(const std::string& url) {
+inline bool isPermalink(const std::string& url) {
     return url.rfind("https://matrix.to/#/", 0) == 0;
 }
 

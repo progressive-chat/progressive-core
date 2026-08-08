@@ -343,7 +343,7 @@ std::string ensureTrailingSlash(const std::string& url) {
     return url + "/";
 }
 
-std::string stripHtmlTags(const std::string& html) {
+inline std::string stripHtmlTags(const std::string& html) {
     std::string result;
     bool inTag = false;
     for (char c : html) {

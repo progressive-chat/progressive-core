@@ -166,13 +166,13 @@ bool isValidUrl(const std::string& url) {
     return url.size() > protoEnd + 3;
 }
 
-std::string ensureProtocol(const std::string& url) {
+inline std::string ensureProtocol(const std::string& url) {
     if (url.empty()) return url;
     if (url.find("http") == 0) return url;
     return "https://" + url;
 }
 
-std::string ensureTrailingSlash(const std::string& url) {
+inline std::string ensureTrailingSlash(const std::string& url) {
     if (url.empty()) return url;
     if (url.back() == '/') return url;
     return url + "/";
