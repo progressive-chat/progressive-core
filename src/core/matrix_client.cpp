@@ -984,10 +984,51 @@ ApiResult<std::vector<uint8_t>> MatrixClient::downloadMedia(const std::string& m
         mxcUrl.c_str(), 0, 0, (size_t)0, httpUrl.c_str());
     auto resp = httpGet(httpUrl, authHeaders(), 30000);
     r.httpStatus = resp.statusCode;
+    bool originFailed = false;
+    // Origin fallback: the homeserver could not serve REMOTE media (not in
+    // its media cache and its federation fetch failed or was refused). Try
+    // the media's OWN server directly — media endpoints are public on almost
+    // every homeserver, so this rescues media the federation path lost.
+    if (!resp.success && resp.statusCode >= 400) {
+        std::string srv = progressive::extractMxcServerName(mxcUrl);
+        std::string mid = progressive::extractMxcMediaId(mxcUrl);
+        std::string hsHost = account().homeserverUrl;
+        auto schemePos = hsHost.find("://");
+        if (schemePos != std::string::npos) hsHost = hsHost.substr(schemePos + 3);
+        auto slashPos = hsHost.find('/');
+        if (slashPos != std::string::npos) hsHost = hsHost.substr(0, slashPos);
+        auto colonPos = hsHost.find(':');
+        if (colonPos != std::string::npos) hsHost = hsHost.substr(0, colonPos);
+        if (!srv.empty() && !mid.empty() && srv != hsHost) {
+            std::ostringstream direct;
+            direct << "https://" << srv << "/_matrix/media/v3/"
+                   << (width > 0 && height > 0 ? "thumbnail/" : "download/")
+                   << srv << "/" << mid;
+            if (width > 0 && height > 0)
+                direct << "?width=" << width << "&height=" << height << "&method=scale";
+            LOG(LogChannel::NET, "downloadMedia: homeserver HTTP %d for mxc=%.120s — "
+                "trying origin %s", resp.statusCode, mxcUrl.c_str(), direct.str().c_str());
+            auto origin = httpGet(direct.str(), {}, 30000);
+            LOG(LogChannel::NET, "downloadMedia: origin mxc=%.120s status=%d size=%zu",
+                mxcUrl.c_str(), origin.statusCode, origin.body.size());
+            if (origin.success && !origin.body.empty()) {
+                r.httpStatus = origin.statusCode;
+                r.ok = true;
+                r.data.assign(origin.body.begin(), origin.body.end());
+                LOG(LogChannel::NET, "downloadMedia: DONE via origin mxc=%.120s status=%d ok=1 size=%zu",
+                    mxcUrl.c_str(), origin.statusCode, r.data.size());
+                return r;
+            }
+            r.error.message = "homeserver HTTP " + std::to_string(resp.statusCode)
+                + ", origin HTTP " + std::to_string(origin.statusCode)
+                + " — media unavailable";
+            originFailed = true;
+        }
+    }
     if (resp.success) {
         r.ok = true;
         r.data.assign(resp.body.begin(), resp.body.end());
-    } else {
+    } else if (!originFailed) {
         if (!resp.body.empty()) r.error = progressive::parseMatrixErrorJson(resp.body);
         r.error.message = resp.errorMessage.empty() ? r.error.message : resp.errorMessage;
     }
