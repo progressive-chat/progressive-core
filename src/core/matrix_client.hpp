@@ -43,6 +43,18 @@ struct ApiResult {
 // Account/session info persisted across runs.
 // (Defined in account_info.hpp — shared with SessionStore to avoid circular include.)
 
+// Registration UIA decision from the server's 401 challenge (pure + testable).
+enum class RegistrationFlowDecision {
+    RetryDummy,      // m.login.dummy advertised -> retry with the session
+    RetryToken,      // m.login.registration_token + token given -> retry
+    TokenRequired,   // registration_token advertised, no token -> prompt in-app
+    Captcha,         // m.login.recaptcha -> browser registration
+    Unsupported,     // nothing usable advertised
+};
+RegistrationFlowDecision decideRegistrationFlow(const std::string& challengeBody,
+                                                bool tokenProvided,
+                                                std::string& outSession);
+
 class MatrixClient {
 public:
     MatrixClient();

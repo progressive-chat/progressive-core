@@ -1457,6 +1457,40 @@ ApiResult<std::string> MatrixClient::uploadMedia(const std::vector<uint8_t>& dat
 
 // ---- Registration ----
 
+RegistrationFlowDecision decideRegistrationFlow(const std::string& challengeBody,
+                                                bool tokenProvided,
+                                                std::string& outSession) {
+    bool flowDummy = false, flowToken = false, flowCaptcha = false;
+    outSession.clear();
+    {
+        simdjson::dom::parser fp;
+        auto fdoc = fp.parse(challengeBody);
+        if (fdoc.error() == simdjson::SUCCESS) {
+            auto sess = fdoc.value()["session"].get_string();
+            if (sess.error() == simdjson::SUCCESS) outSession = std::string(sess.value());
+            auto flows = fdoc.value()["flows"];
+            for (auto f : flows.get_array().value()) {
+                // Registration flows advertise STAGES (list of auth types),
+                // not a single "type" (that's the /login shape).
+                auto stages = f["stages"];
+                for (auto st : stages.get_array().value()) {
+                    auto t = st.get_string();
+                    if (t.error() != simdjson::SUCCESS) continue;
+                    std::string type(t.value());
+                    if (type == "m.login.dummy") flowDummy = true;
+                    else if (type == "m.login.registration_token") flowToken = true;
+                    else if (type == "m.login.recaptcha") flowCaptcha = true;
+                }
+            }
+        }
+    }
+    if (flowDummy) return RegistrationFlowDecision::RetryDummy;
+    if (flowToken) return tokenProvided ? RegistrationFlowDecision::RetryToken
+                                       : RegistrationFlowDecision::TokenRequired;
+    if (flowCaptcha) return RegistrationFlowDecision::Captcha;
+    return RegistrationFlowDecision::Unsupported;
+}
+
 ApiResult<AccountInfo> MatrixClient::registerAccount(const std::string& username,
                                                         const std::string& password,
                                                         const std::string& homeserverUrl,
@@ -1493,18 +1527,21 @@ ApiResult<AccountInfo> MatrixClient::registerAccount(const std::string& username
         r.error.message = "register: missing user_id or access_token in response";
         return r;
     }
-    // 401 means the server requires additional auth stages (e.g. captcha)
+    // 401 means the server requires additional auth stages. Parse the
+    // advertised flows to answer honestly instead of guessing "captcha".
     if (resp.statusCode == 401) {
-        // Check if m.login.dummy is in the flows — if so, retry with session
-        auto session = progressive::parseJsonStringValue(resp.body, "session");
-        if (!session.empty()) {
-            // Retry with the session
+        std::string session;
+        auto decision = decideRegistrationFlow(resp.body, !regToken.empty(), session);
+        bool canRetry = (decision == RegistrationFlowDecision::RetryDummy ||
+                         decision == RegistrationFlowDecision::RetryToken) && !session.empty();
+        if (canRetry) {
             std::ostringstream body2;
             body2 << R"({"username":")" << jsonEscape(username) << R"(","password":")"
                   << jsonEscape(password) << R"(","auth":{"type":")"
-                  << (regToken.empty() ? "m.login.dummy" : "m.login.registration_token")
+                  << (decision == RegistrationFlowDecision::RetryDummy
+                          ? "m.login.dummy" : "m.login.registration_token")
                   << R"(","session":")" << jsonEscape(session) << R"(")";
-            if (!regToken.empty()) {
+            if (decision == RegistrationFlowDecision::RetryToken) {
                 body2 << R"(,"token":")" << jsonEscape(regToken) << R"(")";
             }
             body2 << R"(}})";
@@ -1523,9 +1560,21 @@ ApiResult<AccountInfo> MatrixClient::registerAccount(const std::string& username
                 }
             }
         }
-        r.error.code = "M_NEEDS_CAPTCHA";
-        r.error.message = "This server requires captcha for registration. "
-                         "Please register via browser (app.element.io/#/register).";
+        if (decision == RegistrationFlowDecision::TokenRequired) {
+            r.error.code = "M_REGISTRATION_TOKEN_REQUIRED";
+            r.error.message = "This server requires a registration token to "
+                              "create accounts. Ask your server admin for one.";
+            return r;
+        }
+        if (decision == RegistrationFlowDecision::Captcha) {
+            r.error.code = "M_NEEDS_CAPTCHA";
+            r.error.message = "This server requires captcha for registration. "
+                              "Register via the browser and log in afterwards.";
+            return r;
+        }
+        r.error.code = "M_REGISTRATION_FLOWS_UNSUPPORTED";
+        r.error.message = "Registration unsupported: the server only offers "
+                          "unavailable auth flows.";
         return r;
     }
     // 403 with registration token error

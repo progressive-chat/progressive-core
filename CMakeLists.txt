@@ -181,6 +181,10 @@ if(PROGRESSIVE_BUILD_TESTS)
     target_link_libraries(test_sync_applier PRIVATE progressive_core)
     add_test(NAME sync_applier COMMAND test_sync_applier)
 
+    add_executable(test_register_flows tests/test_register_flows.cpp)
+    target_link_libraries(test_register_flows PRIVATE progressive_core)
+    add_test(NAME register_flows COMMAND test_register_flows)
+
     add_executable(test_media_crypto tests/test_media_crypto.cpp)
     target_link_libraries(test_media_crypto PRIVATE progressive_core)
     add_test(NAME media_crypto COMMAND test_media_crypto)
