@@ -640,6 +640,7 @@ std::string Decryptor::handleOlmEncryptedToDevice(const std::string& senderId,
                     "ours (after a device-key reset). They must refresh their device "
                     "list or reset encryption in their client.",
                     std::string(entry.key).c_str());
+                if (identityHintCount_ < 100000) identityHintCount_++;
             }
         }
         return {};

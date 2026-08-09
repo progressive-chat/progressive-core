@@ -219,6 +219,13 @@ public:
     bool fallbackDueForRotation() const;
     static constexpr int64_t kFallbackMaxAgeMs = 7LL * 24 * 3600 * 1000;
 
+    // Count of "sender encrypted to an identity we no longer hold" events
+    // (peers still caching OUR old curve after a reset). Used by the UI to
+    // surface a "reset device keys" banner instead of silent undecryptable
+    // messages.
+    int identityHintCount() const { return identityHintCount_; }
+    void resetIdentityHintCount() { identityHintCount_ = 0; }
+
     // ---- Room key sharing (full E2EE outbound) ----
     // Shares the outbound megolm session key with all room members' devices.
     // Steps:
@@ -387,6 +394,7 @@ private:
     int64_t otkClaimRateLimitMs_ = 300000;  // default 5 min
     int otkDrainBudget_ = 200;              // stale keys claimed per share per device
     int64_t fallbackGeneratedAtMs_ = 0;     // steady ms of the last fallback generation
+    int identityHintCount_ = 0;             // see identityHintCount()
     bool shareKeysVerifiedOnly_ = false;  // policy: only share with SAS-verified devices
     VerifiedDeviceChecker verifiedDeviceChecker_;
     // m.dummy recovery throttle: senderKey -> last attempt (ms). Time-bounded
