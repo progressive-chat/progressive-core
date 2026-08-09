@@ -1463,25 +1463,35 @@ RegistrationFlowDecision decideRegistrationFlow(const std::string& challengeBody
     bool flowDummy = false, flowToken = false, flowCaptcha = false;
     outSession.clear();
     {
-        simdjson::dom::parser fp;
-        auto fdoc = fp.parse(challengeBody);
-        if (fdoc.error() == simdjson::SUCCESS) {
+        // Flatten the flows into plain strings FIRST — nested DOM iteration
+        // over the live parser buffer is fragile (and crashed in Release).
+        std::vector<std::string> stageTypes;
+        {
+            simdjson::dom::parser fp;
+            auto fdoc = fp.parse(challengeBody);
+            if (fdoc.error() != simdjson::SUCCESS) return RegistrationFlowDecision::Unsupported;
             auto sess = fdoc.value()["session"].get_string();
             if (sess.error() == simdjson::SUCCESS) outSession = std::string(sess.value());
-            auto flows = fdoc.value()["flows"];
-            for (auto f : flows.get_array().value()) {
-                // Registration flows advertise STAGES (list of auth types),
-                // not a single "type" (that's the /login shape).
-                auto stages = f["stages"];
-                for (auto st : stages.get_array().value()) {
+            auto flowsElem = fdoc.value()["flows"];
+            if (flowsElem.error() != simdjson::SUCCESS) return RegistrationFlowDecision::Unsupported;
+            auto flowsArr = flowsElem.get_array();
+            if (flowsArr.error() != simdjson::SUCCESS) return RegistrationFlowDecision::Unsupported;
+            for (auto f : flowsArr.value()) {
+                auto stagesElem = f["stages"];
+                if (stagesElem.error() != simdjson::SUCCESS) continue;
+                auto stagesArr = stagesElem.get_array();
+                if (stagesArr.error() != simdjson::SUCCESS) continue;
+                for (auto st : stagesArr.value()) {
                     auto t = st.get_string();
-                    if (t.error() != simdjson::SUCCESS) continue;
-                    std::string type(t.value());
-                    if (type == "m.login.dummy") flowDummy = true;
-                    else if (type == "m.login.registration_token") flowToken = true;
-                    else if (type == "m.login.recaptcha") flowCaptcha = true;
+                    if (t.error() == simdjson::SUCCESS)
+                        stageTypes.emplace_back(t.value());
                 }
             }
+        }
+        for (const auto& type : stageTypes) {
+            if (type == "m.login.dummy") flowDummy = true;
+            else if (type == "m.login.registration_token") flowToken = true;
+            else if (type == "m.login.recaptcha") flowCaptcha = true;
         }
     }
     if (flowDummy) return RegistrationFlowDecision::RetryDummy;
