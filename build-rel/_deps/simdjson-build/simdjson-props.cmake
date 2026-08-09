@@ -1,0 +1,6 @@
+target_compile_definitions("${target}" ${public} [==[SIMDJSON_DISABLE_DEPRECATED_API=1]==])
+target_include_directories("${target}" ${public} [==[$<BUILD_INTERFACE:/tmp/opencode/progressive-core/build-rel/_deps/simdjson-src/include>]==] ${private} [==[$<BUILD_INTERFACE:/tmp/opencode/progressive-core/build-rel/_deps/simdjson-src/src>]==])
+target_compile_features("${target}" ${public} [==[cxx_std_11]==])
+target_compile_options("${target}" ${private} [==[$<$<CONFIG:DEBUG>:-Og>]==])
+target_link_libraries("${target}" ${public} [==[Threads::Threads]==])
+target_compile_definitions("${target}" ${public} [==[SIMDJSON_THREADS_ENABLED=1]==])

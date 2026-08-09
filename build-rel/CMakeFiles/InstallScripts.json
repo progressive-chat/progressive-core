@@ -1,0 +1,9 @@
+{
+	"InstallScripts" : 
+	[
+		"/tmp/opencode/progressive-core/build-rel/cmake_install.cmake",
+		"/tmp/opencode/progressive-core/build-rel/_deps/olm-build/cmake_install.cmake",
+		"/tmp/opencode/progressive-core/build-rel/_deps/simdjson-build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

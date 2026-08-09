@@ -115,6 +115,12 @@ public:
     // survive a restart).
     void clearPersistedOutboundSessions();
 
+    // Drop the persisted Olm 1:1 session pickle for the current account.
+    // Called after an identity reset so OLD-identity 1:1 sessions cannot be
+    // reloaded on the next restart (they would make every Olm message
+    // undecryptable: we encrypt to an identity we no longer hold).
+    void clearPersistedOlmSessions();
+
     // ---- Key backup (Phase 7) ----
     // Create a backup version; returns the recovery key ("" on failure) —
     // the caller shows it ONCE.

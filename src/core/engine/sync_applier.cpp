@@ -331,6 +331,11 @@ void SyncApplier::fastEventToDisplayed(const FastEvent& e, DisplayedEvent& de,
                 de.mxcUrl = extractStringDec(de.contentJson, "url");
             extractEncryptedFile(de.contentJson, "info.thumbnail_file",
                                  de.thumbUrl, de.thumbKey, de.thumbIv, de.thumbSha256);
+            // Plain (unencrypted) media: the sender may attach a poster/thumbnail
+            // via info.thumbnail_url — needed for VIDEO previews in plain rooms
+            // (the video itself has no server-side thumbnail).
+            if (de.thumbUrl.empty())
+                de.thumbUrl = extractStringDec(de.contentJson, "info.thumbnail_url");
             if (de.mimetype.empty())
                 de.mimetype = extractStringDec(de.contentJson, "mimetype");
             if (de.body.empty())

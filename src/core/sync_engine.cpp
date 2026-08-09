@@ -1126,6 +1126,9 @@ SyncEngine::E2eeInitResult SyncEngine::initializeE2EE() {
                     acct.userId.c_str());
                 if (decryptor_.resetIdentity()) {
                     decryptor_.setAccountShared(false);
+                    // Old-identity Olm 1:1 sessions must not survive the
+                    // restart (they encrypt to an identity we no longer hold).
+                    clearPersistedOlmSessions();
                     uploadDeviceKeys(true);
                     LOG(LogChannel::E2EE, "initializeE2EE: identity regenerated — new curve=%.30s",
                         decryptor_.curve25519Key().c_str());
@@ -1203,6 +1206,15 @@ void SyncEngine::clearPersistedOutboundSessions() {
     std::string pickleKey = client_->account().userId + "/" + client_->account().deviceId;
     store_->clearOutboundSessions(pickleKey);
     LOG(LogChannel::E2EE, "clearPersistedOutboundSessions: dropped outbound pickle for %s",
+        pickleKey.c_str());
+}
+
+void SyncEngine::clearPersistedOlmSessions() {
+    if (!store_ || !client_) return;
+    std::lock_guard<std::mutex> lk(persistMtx_);
+    std::string pickleKey = client_->account().userId + "/" + client_->account().deviceId;
+    store_->saveOlmSessions("[]", pickleKey);
+    LOG(LogChannel::E2EE, "clearPersistedOlmSessions: dropped 1:1 session pickle for %s",
         pickleKey.c_str());
 }
 
