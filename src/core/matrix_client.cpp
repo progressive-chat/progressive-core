@@ -1597,6 +1597,22 @@ ApiResult<AccountInfo> MatrixClient::registerAccount(const std::string& username
             return r;
         }
     }
+    // 403 registration disabled by policy (matrix.org: application-service
+    // registrations only) — no client or browser can bypass this; the UI
+    // explains and offers the registration page link anyway.
+    if (resp.statusCode == 403) {
+        auto errBody = progressive::parseMatrixErrorJson(resp.body);
+        std::string lower = errBody.message;
+        for (auto& c : lower) c = (char)std::tolower((unsigned char)c);
+        if (lower.find("disabled") != std::string::npos ||
+            lower.find("application_service") != std::string::npos) {
+            r.error.code = "M_REGISTRATION_DISABLED";
+            r.error.message = errBody.message.empty()
+                ? "Registration is disabled on this server."
+                : errBody.message;
+            return r;
+        }
+    }
     // Other error
     if (!resp.body.empty()) {
         r.error = progressive::parseMatrixErrorJson(resp.body);

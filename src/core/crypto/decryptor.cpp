@@ -2259,33 +2259,39 @@ bool Decryptor::sendOlmToDevice(const std::string& targetUserId,
     }
 
     // 2. Claim an OTK (fallback key returned when the pool is exhausted).
-    // Retry once with a fresh claim on signature failure: the server may hand
-    // out a different (fresh) OTK — claiming also consumes stale keys, so a
-    // retry often reaches a valid one.
+    // Stale-pool handling (shareRoomKey parity): the rate limit gates ONE
+    // logical attempt per (user,device) per window — even key-request
+    // answers (the forceFresh flood that froze the desktop). Inside that
+    // attempt, keep claiming until a VALID key surfaces (each claim consumes
+    // a stale one), capped by the drain budget — answers use a smaller cap
+    // so a flood of re-requests can never trigger huge claim bursts. On
+    // exhaustion, PROCEED with the last claimed key (Element/Nheko parity).
     std::string oneTimeKey, otkSig;
-    auto claimAndVerify = [&](bool secondAttempt) {
-        // Claim policy: key requests (forceFresh) always claim; everything
-        // else respects the per-(user,device) rate-limit window.
-        if (!forceFresh && !claimAllowed(targetUserId, targetDeviceId, false)) {
-            LOG(LogChannel::E2EE, "sendOlmToDevice: claim rate-limited for %s/%s",
-                targetUserId.c_str(), targetDeviceId.c_str());
-            return false;
-        }
+    int drainCap = forceFresh
+        ? (otkDrainBudget_ > 10 ? 10 : otkDrainBudget_)
+        : otkDrainBudget_;
+    if (!claimAllowed(targetUserId, targetDeviceId, false)) {
+        LOG(LogChannel::E2EE, "sendOlmToDevice: claim rate-limited for %s/%s "
+            "(window — requester retries later)", targetUserId.c_str(), targetDeviceId.c_str());
+        return false;
+    }
+    bool claimUsable = false;
+    for (int attempt = 0; attempt <= drainCap && !claimUsable; ++attempt) {
         noteClaimed(targetUserId, targetDeviceId);
         std::string claimBody = "{\"one_time_keys\":{\"" + targetUserId
             + "\":{\"" + targetDeviceId + "\":\"signed_curve25519\"}}}";
         auto claimResp = httpPost(ctxHomeserver_ + "/_matrix/client/v3/keys/claim",
                                   claimBody, hdrs, 15000);
-        if (!claimResp.success) return false;
+        if (!claimResp.success) break;
         oneTimeKey.clear();
         otkSig.clear();
         {
             simdjson::dom::parser p;
             auto doc = p.parse(claimResp.body);
-            if (doc.error() != simdjson::SUCCESS) return false;
+            if (doc.error() != simdjson::SUCCESS) break;
             auto devObj = doc.value()["one_time_keys"][targetUserId][targetDeviceId];
             auto keyObj = devObj.get_object();
-            if (keyObj.error() != simdjson::SUCCESS) return false;
+            if (keyObj.error() != simdjson::SUCCESS) break;  // pool exhausted
             for (auto k : keyObj.value()) {
                 if (std::string(k.key).find("signed_curve25519:") != 0) continue;
                 auto kv = k.value["key"].get_string();
@@ -2295,15 +2301,19 @@ bool Decryptor::sendOlmToDevice(const std::string& targetUserId,
                 break;
             }
         }
-        if (oneTimeKey.empty()) return false;
-        if (otkSig.empty()) return true;  // nothing to verify (server quirk)
-        return verifyOtk(theirEd, oneTimeKey, otkSig);
-    };
-    if (!claimAndVerify(false) && !claimAndVerify(true)) {
-        LOG(LogChannel::E2EE, "sendOlmToDevice: OTK sig INVALID for %s/%s after re-claim — "
-            "its OTK pool holds keys from an older identity (peer must rotate keys)",
+        if (oneTimeKey.empty()) break;
+        if (otkSig.empty()) { claimUsable = true; break; }  // nothing to verify (server quirk)
+        if (verifyOtk(theirEd, oneTimeKey, otkSig)) { claimUsable = true; break; }
+        LOG(LogChannel::E2EE, "sendOlmToDevice: OTK sig INVALID for %s/%s (claim %d) — draining",
+            targetUserId.c_str(), targetDeviceId.c_str(), attempt);
+    }
+    if (!claimUsable) {
+        // Warn-and-proceed (Element/Nheko parity): build the session with the
+        // last claimed key anyway. If the key was genuinely stale the peer
+        // cannot decrypt this one message and re-requests — never wedge here.
+        LOG(LogChannel::E2EE, "sendOlmToDevice: OTK sig INVALID for %s/%s after drain — "
+            "proceeding with the claimed key anyway (Element/Nheko parity)",
             targetUserId.c_str(), targetDeviceId.c_str());
-        return false;
     }
 
     std::string plaintext = "{\"type\":\"" + innerType + "\",\"content\":" + innerContent
