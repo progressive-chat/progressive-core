@@ -4,3 +4,4 @@ build/
 cmake-build-*/
 sqlite3.zip
 build2/
+build-rel/

@@ -1,7 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"/tmp/opencode/progressive-core/build-rel/_deps/simdjson-subbuild/cmake_install.cmake"
-	],
-	"Parallel" : false
-}
