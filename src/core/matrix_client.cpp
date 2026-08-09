@@ -23,6 +23,13 @@ namespace progressive::desktop {
 namespace {
 
 // ---- Helper: URL-encode a room ID or alias for use in paths.
+// matrix.org rejects m.id.user with a full MXID — only the localpart works.
+std::string loginLocalpart(const std::string& mxid) {
+    if (mxid.empty() || mxid[0] != '@') return mxid;
+    auto colon = mxid.find(':');
+    return colon == std::string::npos ? mxid.substr(1) : mxid.substr(1, colon - 1);
+}
+
 std::string urlEncodePath(const std::string& s) {
     std::string out;
     out.reserve(s.size());
@@ -563,7 +570,7 @@ ApiResult<bool> MatrixClient::changePassword(const std::string& currentPassword,
         std::ostringstream body;
         body << "{\"auth\":{\"type\":\"m.login.password\",\"identifier\":"
                 "{\"type\":\"m.id.user\",\"user\":\""
-             << account().userId << "\"},\"password\":\""
+             << loginLocalpart(account().userId) << "\"},\"password\":\""
              << jsonEscape(currentPassword) << "\"";
         if (!session.empty()) body << ",\"session\":\"" << session << "\"";
         body << "},\"new_password\":\"" << jsonEscape(newPassword) << "\"}";
@@ -624,7 +631,7 @@ ApiResult<std::string> MatrixClient::deleteDevice(const std::string& deviceId,
     std::ostringstream body;
     body << "{\"auth\":{\"type\":\"m.login.password\",\"identifier\":"
           "{\"type\":\"m.id.user\",\"user\":\""
-         << account().userId << "\"},\"password\":\""
+         << loginLocalpart(account().userId) << "\"},\"password\":\""
          << jsonEscape(password) << "\"},\"devices\":[\"" << deviceId << "\"]}";
     auto resp = httpPost(account().homeserverUrl + "/_matrix/client/v3/delete_devices",
                          body.str(), authHeaders(), 15000);
