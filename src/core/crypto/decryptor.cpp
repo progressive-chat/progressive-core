@@ -1775,6 +1775,8 @@ void Decryptor::resendAllPendingRequests() {
 bool Decryptor::resetIdentity() {
     if (!account_) return false;
     clearPerAccountState();
+    otkLastClaimMs_.clear();  // new identity = fresh OTK claims are allowed
+    fallbackGeneratedAtMs_ = 0;
     if (!account_->reset()) return false;
     if (!account_->create()) return false;
     LOG(LogChannel::E2EE, "resetIdentity: new identity keys generated — 1:1 sessions cleared");
