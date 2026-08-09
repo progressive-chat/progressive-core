@@ -1630,6 +1630,10 @@ void Decryptor::requestRoomKey(const std::string& roomId, const std::string& sen
     std::string key = roomId + "|" + sessionId + "|" + senderKey;
     {
         std::lock_guard<std::mutex> lk(requestMtx_);
+        // Sticky give-up: this session exhausted its retries — never restart
+        // the schedule (the 200-entry cap may evict the entry; the gave-up
+        // state must survive).
+        if (gaveUpKeys_.count(key)) return;
         if (requestedKeys_.count(key)) return;  // retries go through maybeReRequestKeys
         KeyRequestState st;
         st.attempts = 1;  // this first request counts
@@ -1900,8 +1904,13 @@ void Decryptor::maybeReRequestKeys() {
         int64_t elapsed = nowMs - st.lastMs;
         if (!shouldReRequestKey(st.attempts, elapsed)) {
             // After the final attempt the backoff stops forever — surface
-            // the dead end once so the room doesn't just say "waiting".
-            if (st.attempts > 5 && !st.gaveUpNotified) {
+            // the dead end once so the room doesn't just say "waiting", and
+            // mark the session gave-up STICKILY so the request can never be
+            // re-spawned by a later sync (cap eviction must not reset it).
+            if (st.attempts > 5) {
+                gaveUpKeys_.insert(key);
+                if (gaveUpKeys_.size() > 1024) gaveUpKeys_.clear();  // bounded
+                if (!st.gaveUpNotified) {
                 st.gaveUpNotified = true;
                 auto sep1 = key.find('|');
                 auto sep2 = key.find('|', sep1 == std::string::npos ? 0 : sep1 + 1);
@@ -1909,6 +1918,7 @@ void Decryptor::maybeReRequestKeys() {
                     noteRoomKey({key.substr(0, sep1),
                                  key.substr(sep1 + 1, sep2 - sep1 - 1),
                                  st.senderId, RoomKeyEventKind::GaveUp, 0, 0});
+                }
                 }
             }
             continue;
@@ -2308,12 +2318,14 @@ bool Decryptor::sendOlmToDevice(const std::string& targetUserId,
             targetUserId.c_str(), targetDeviceId.c_str(), attempt);
     }
     if (!claimUsable) {
-        // Warn-and-proceed (Element/Nheko parity): build the session with the
-        // last claimed key anyway. If the key was genuinely stale the peer
-        // cannot decrypt this one message and re-requests — never wedge here.
+        // Fail fast: an Olm message built with a stale (old-identity) key can
+        // NEVER be decrypted by the peer — sending it only feeds their
+        // re-request loop. The drain already consumed stale keys; a later
+        // attempt succeeds once a valid key is in the pool.
         LOG(LogChannel::E2EE, "sendOlmToDevice: OTK sig INVALID for %s/%s after drain — "
-            "proceeding with the claimed key anyway (Element/Nheko parity)",
+            "not sending (peer's pool has no valid key yet; will retry)",
             targetUserId.c_str(), targetDeviceId.c_str());
+        return false;
     }
 
     std::string plaintext = "{\"type\":\"" + innerType + "\",\"content\":" + innerContent

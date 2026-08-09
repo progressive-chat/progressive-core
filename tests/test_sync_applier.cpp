@@ -188,6 +188,17 @@ int main() {
               "retry: fifth retry after 30min");
         CHECK(!progressive::desktop::shouldReRequestKey(6, 3600000),
               "retry: capped after 5 retries");
+        // Sticky give-up gate: a session that exhausted its retries must never
+        // be re-requested (the entry may be evicted by the map cap — the
+        // gave-up state survives).
+        CHECK(progressive::desktop::shouldIssueKeyRequest(1, false),
+              "giveup: attempt 1 issued when not gave up");
+        CHECK(progressive::desktop::shouldIssueKeyRequest(5, false),
+              "giveup: attempt 5 still issued");
+        CHECK(!progressive::desktop::shouldIssueKeyRequest(6, false),
+              "giveup: attempt 6 not issued (schedule ended)");
+        CHECK(!progressive::desktop::shouldIssueKeyRequest(1, true),
+              "giveup: a gave-up session is never re-requested, even at attempt 1");
     }
 
     // --- encrypted media (file:) extraction ---

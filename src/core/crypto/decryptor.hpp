@@ -74,6 +74,14 @@ inline bool shouldReRequestKey(int attempts, int64_t elapsedMs) {
     return elapsedMs >= kSchedule[attempts - 1];
 }
 
+// A session whose retries are exhausted (gave up) must NEVER be re-requested:
+// the request entry may be evicted by the map cap, but the gave-up state is
+// sticky — otherwise the 10s..30m schedule restarts forever (seen live:
+// ~20 corrupt sessions kept the request loop running indefinitely).
+inline bool shouldIssueKeyRequest(int attempts, bool gaveUp) {
+    return !gaveUp && attempts <= 5;
+}
+
 class Decryptor {
 public:
     Decryptor();
@@ -372,6 +380,7 @@ private:
         bool gaveUpNotified = false;  // surfaced the give-up row after attempt 5
     };
     std::unordered_map<std::string, KeyRequestState> requestedKeys_;
+    std::unordered_set<std::string> gaveUpKeys_;  // sticky: never re-request these sessions
     std::unordered_set<std::string> recentKeyRequests_;  // dedup by request_id (capped)
     // OTK claim policy state (see the public setters).
     std::unordered_map<std::string, int64_t> otkLastClaimMs_;  // "user|device" -> steady ms
