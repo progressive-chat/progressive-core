@@ -1208,7 +1208,8 @@ MatrixClient::FastSyncResult MatrixClient::syncFast(const std::string& since,
     r.httpStatus = resp.statusCode;
     if (resp.success) {
         std::string err;
-        r.data = parseSyncResponseFast(std::move(resp.body), err, account().deviceId);
+        r.data = parseSyncResponseFast(std::move(resp.body), err, account().deviceId,
+                                       account().userId);
         r.ok = err.empty();
         if (!r.ok) r.error.message = std::move(err);
     } else {

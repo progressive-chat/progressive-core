@@ -124,6 +124,27 @@ static void test_sync_unused_fallback_parse() {
         R"({"device_one_time_keys_count":{"signed_curve25519":5}})", err);
     CHECK(resp2.unusedFallbackKeyTypes.empty(),
           "sync-fallback: absent field → empty vector");
+
+    // OTK count — modern Synapse shape (keyed by device id directly):
+    // {"device_one_time_keys_count":{"<deviceId>":{"signed_curve25519":N}}}.
+    auto resp3 = progressive::desktop::parseSyncResponseFast(
+        R"({"device_one_time_keys_count":{"DEV1":{"signed_curve25519":7}}})", err,
+        "DEV1");
+    CHECK(resp3.signedCurve25519Count == 7,
+          "otk-count: modern flat per-device shape parsed");
+
+    // Older spec shape (nested under user id) with the userId supplied.
+    auto resp4 = progressive::desktop::parseSyncResponseFast(
+        R"({"device_one_time_keys_count":{"@u:s":{"DEV1":{"signed_curve25519":3}}}})",
+        err, "DEV1", "@u:s");
+    CHECK(resp4.signedCurve25519Count == 3,
+          "otk-count: older nested user/device shape parsed");
+
+    // Legacy flat map fallback.
+    auto resp5 = progressive::desktop::parseSyncResponseFast(
+        R"({"one_time_keys_count":{"signed_curve25519":11}})", err);
+    CHECK(resp5.signedCurve25519Count == 11,
+          "otk-count: legacy flat map parsed");
 }
 
 static void test_rng_is_csprng() {

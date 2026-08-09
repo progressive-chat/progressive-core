@@ -134,7 +134,8 @@ FastRoom buildFastRoom(simdjson::dom::element room,
 } // namespace
 
 FastSyncResponse parseSyncResponseFast(std::string json, std::string& errorMessage,
-                                        const std::string& ourDeviceId) {
+                                        const std::string& ourDeviceId,
+                                        const std::string& ourUserId) {
     FastSyncResponse resp;
     errorMessage.clear();
 
@@ -257,15 +258,22 @@ FastSyncResponse parseSyncResponseFast(std::string json, std::string& errorMessa
             resp.deviceListChanged.size(), resp.deviceListLeft.size());
     }
 
-    // one_time_keys_count is the flat {algorithm: count} map (deprecated but
-    // always present); device_one_time_keys_count is keyed per device. Prefer
-    // the per-device value when we know our device id, else the flat map.
+    // Modern Synapse sends device_one_time_keys_count keyed directly by
+    // device id; the older spec shape nests it under the user id. The flat
+    // one_time_keys_count map is deprecated but still present on old
+    // servers. Try all three shapes, preferring the per-device value.
     bool gotCount = false;
     if (!ourDeviceId.empty()) {
-        auto perDev = root["device_one_time_keys_count"][ourDeviceId]["signed_curve25519"].get_int64();
-        if (perDev.error() == simdjson::SUCCESS) {
-            resp.signedCurve25519Count = static_cast<int>(perDev.value());
+        auto perDevFlat = root["device_one_time_keys_count"][ourDeviceId]["signed_curve25519"].get_int64();
+        if (perDevFlat.error() == simdjson::SUCCESS) {
+            resp.signedCurve25519Count = static_cast<int>(perDevFlat.value());
             gotCount = true;
+        } else if (!ourUserId.empty()) {
+            auto perDevNested = root["device_one_time_keys_count"][ourUserId][ourDeviceId]["signed_curve25519"].get_int64();
+            if (perDevNested.error() == simdjson::SUCCESS) {
+                resp.signedCurve25519Count = static_cast<int>(perDevNested.value());
+                gotCount = true;
+            }
         }
     }
     if (!gotCount) {
