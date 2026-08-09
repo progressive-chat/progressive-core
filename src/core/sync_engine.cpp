@@ -1414,7 +1414,8 @@ void SyncEngine::uploadFallbackKey() {
 
 ApiResult<std::string> SyncEngine::sendMessage(const std::string& roomId,
                                                 const std::string& body,
-                                                const std::string& msgtype) {
+                                                const std::string& msgtype,
+                                                const std::string& threadRoot) {
     ApiResult<std::string> r;
     if (!client_) { r.error.message = "not logged in"; return r; }
     if (!client_->isRoomEncrypted(roomId)) {
@@ -1460,8 +1461,12 @@ ApiResult<std::string> SyncEngine::sendMessage(const std::string& roomId,
     }
 
     std::string inner = "{\"type\":\"m.room.message\",\"content\":{\"msgtype\":\""
-                        + msgtype + "\",\"body\":\"" + body + "\"},\"room_id\":\""
-                        + roomId + "\"}";
+                        + msgtype + "\",\"body\":\"" + body + "\"";
+    if (!threadRoot.empty()) {
+        inner += ",\"m.relates_to\":{\"rel_type\":\"m.thread\",\"event_id\":\""
+                 + threadRoot + "\"}";
+    }
+    inner += "},\"room_id\":\"" + roomId + "\"}";
     std::string enc = decryptor_.encryptMessage(roomId, client_->account().deviceId, inner);
     if (enc.empty()) {
         r.error.message = "encryption failed";

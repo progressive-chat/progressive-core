@@ -85,7 +85,8 @@ public:
     // key to all joined members, then sends m.room.encrypted.
     ApiResult<std::string> sendMessage(const std::string& roomId,
                                        const std::string& body,
-                                       const std::string& msgtype = "m.text");
+                                       const std::string& msgtype = "m.text",
+                                       const std::string& threadRoot = "");
     VerificationManager& verificationManager() { return verificationManager_; }
     void setPollTimeout(int ms) { syncTimeoutMs_ = ms; }
     void setBackupPathProvider(std::function<std::string()> provider) {
