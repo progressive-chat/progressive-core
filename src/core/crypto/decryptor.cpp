@@ -2277,14 +2277,15 @@ bool Decryptor::sendOlmToDevice(const std::string& targetUserId,
     // so a flood of re-requests can never trigger huge claim bursts. On
     // exhaustion, PROCEED with the last claimed key (Element/Nheko parity).
     std::string oneTimeKey, otkSig;
+    // Answers must ALWAYS be servable (a legit peer sends a fresh key request
+    // for every session it lacks, possibly many within a minute — the CI
+    // multi-device scenario exercises exactly this). The flood protection is
+    // the REQUEST side: the sticky give-up terminates a peer's endless
+    // re-requesting, and the request_id dedup prevents duplicate answers.
+    // The claim rate limit stays on the share/broadcast path only.
     int drainCap = forceFresh
         ? (otkDrainBudget_ > 10 ? 10 : otkDrainBudget_)
         : otkDrainBudget_;
-    if (!claimAllowed(targetUserId, targetDeviceId, false)) {
-        LOG(LogChannel::E2EE, "sendOlmToDevice: claim rate-limited for %s/%s "
-            "(window — requester retries later)", targetUserId.c_str(), targetDeviceId.c_str());
-        return false;
-    }
     bool claimUsable = false;
     for (int attempt = 0; attempt <= drainCap && !claimUsable; ++attempt) {
         noteClaimed(targetUserId, targetDeviceId);
