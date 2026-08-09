@@ -95,7 +95,7 @@ public:
 
     // Upload device keys + one-time keys to the server.
     // Call once after init() + login. Non-blocking (spawns a thread).
-    void uploadDeviceKeys(bool force = false);
+    void uploadDeviceKeys(bool force = false, int knownServerCount = -1);
 
     // Generate (if needed) + upload the fallback key. Called from the sync
     // loop when the server reports no unused fallback key of our type.
@@ -226,6 +226,7 @@ private:
     std::string sinceToken_;
     SyncEngineStats stats_;
     bool firstRun_ = false;  // true → next sync uses empty since (gets current state)
+    bool hadSavedSince_ = false;  // a per-user sync position was loaded at start
     int syncTimeoutMs_ = 3000;
     std::function<std::string()> backupPathProvider_;
     // Cooldown for fallback re-uploads: servers that never acknowledge the

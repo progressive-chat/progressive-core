@@ -682,7 +682,11 @@ std::string Decryptor::handleOlmEncryptedToDevice(const std::string& senderId,
     auto* underlyingAccount = static_cast<progressive::OlmAccount*>(account_->rawAccount());
     std::fprintf(stderr, "[E2EE] DBG7: account ready\n");
 
-    if (msgType == 0) {
+    // Pre-key messages create an inbound session: type 0 (this codebase's
+    // convention for a fresh pre-key) and type 2 (pre-key encrypted with the
+    // recipient's FALLBACK key — sent when the peer's OTK pool is exhausted,
+    // e.g. after a drain). olm_create_inbound_session accepts both.
+    if (msgType == 0 || msgType == 2) {
         // Pre-key message — create inbound session, then decrypt
         // createInbound mutates the buffer via (void*) cast in olm.cpp:226.
         // Must pass a copy so the original body remains intact for decrypt.

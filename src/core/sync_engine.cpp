@@ -67,9 +67,13 @@ void SyncEngine::start() {
 
     // Load this account's saved since-token (per-user — never another
     // account's sync position).
+    hadSavedSince_ = false;
     if (store_ && client_) {
         auto tok = store_->loadSyncToken(client_->account().userId);
-        if (tok) sinceToken_ = *tok;
+        if (tok) {
+            sinceToken_ = *tok;
+            hadSavedSince_ = true;
+        }
     }
     firstRun_ = true;  // next sync uses empty since → gets current state for all rooms
 
@@ -283,10 +287,18 @@ void SyncEngine::run() {
         // session key — otherwise everything we send with pre-existing
         // sessions stays unreadable for them (Element shares on membership
         // change; this is the same behavior).
-        handleRoomKeyShares(result.data);
-        // Process to-device events (E2EE): m.room_key adds megolm sessions,
-        // m.room.encrypted handles Olm 1:1 (decrypts room_key delivery).
-        processToDeviceEvents(result.data);
+        // First sync after a start with a SAVED position uses an empty since
+        // to (re)load room state. The server replays the WHOLE buffered
+        // to-device queue in that response — every event is already consumed
+        // by the previous session. Re-processing them re-answers old key
+        // requests and resurrects dead verification transactions (stale
+        // requests keep re-delivering forever). Skip share+to-device on that
+        // replay; incremental syncs (real since) deliver only fresh events.
+        bool skipReplay = useEmptySince && hadSavedSince_;
+        if (!skipReplay) {
+            handleRoomKeyShares(result.data);
+            processToDeviceEvents(result.data);
+        }
         // Room-key request retries (backoff schedule) — every sync tick, even
         // when this sync carried no data (quiet room = no handler call).
         decryptor_.maybeReRequestKeys();
@@ -326,7 +338,7 @@ void SyncEngine::run() {
         if (result.data.signedCurve25519Count >= 0 && result.data.signedCurve25519Count < 50) {
             LOG(LogChannel::E2EE, "sync: OTK count=%d (<50) — uploading fresh keys",
                 result.data.signedCurve25519Count);
-            uploadDeviceKeys(true);
+            uploadDeviceKeys(true, result.data.signedCurve25519Count);
         } else if (!otkCountSeen_ && stats_.syncs % 20 == 0) {
             uploadDeviceKeys(true);
         }
@@ -678,7 +690,7 @@ void SyncEngine::handleVerificationEvent(const std::string& type,
 
 // Upload device keys to the server. Call once at login.
 // force=true: bypass otk_uploaded_once flag (used by auto-refresh when count<5).
-void SyncEngine::uploadDeviceKeys(bool force) {
+void SyncEngine::uploadDeviceKeys(bool force, int knownServerCount) {
     LOG(LogChannel::E2EE, "uploadDeviceKeys: ENTER client=%p isLoggedIn=%d decryptor=%d force=%d",
         (void*)client_.get(),
         client_ ? client_->isLoggedIn() : 0,
@@ -711,6 +723,7 @@ void SyncEngine::uploadDeviceKeys(bool force) {
     if (deviceId.empty()) deviceId = "PROGRESSIVE_DESKTOP";
 
     int serverCount = decryptor_.account()->uploadedKeyCount();
+    if (force && knownServerCount >= 0) serverCount = knownServerCount;
     int maxKeys = 100;
     int needed = std::max(0, maxKeys - serverCount);
     if (needed == 0 && decryptor_.accountShared() && !needDeviceKeys) {

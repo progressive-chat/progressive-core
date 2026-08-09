@@ -258,15 +258,21 @@ FastSyncResponse parseSyncResponseFast(std::string json, std::string& errorMessa
             resp.deviceListChanged.size(), resp.deviceListLeft.size());
     }
 
-    // Modern Synapse sends device_one_time_keys_count keyed directly by
-    // device id; the older spec shape nests it under the user id. The flat
-    // one_time_keys_count map is deprecated but still present on old
-    // servers. Try all three shapes, preferring the per-device value.
+    // Synapse sends device_one_time_keys_count in one of three shapes:
+    // 1. flat, keyed by algorithm: {"signed_curve25519": N} (modern matrix.org)
+    // 2. keyed by device id:      {"<deviceId>": {"signed_curve25519": N}}
+    // 3. keyed by user+device:    {"<userId>": {"<deviceId>": {...}}}
+    // The flat one_time_keys_count map is deprecated but still present on old
+    // servers. Try all four shapes, preferring the first that matches.
     bool gotCount = false;
-    if (!ourDeviceId.empty()) {
-        auto perDevFlat = root["device_one_time_keys_count"][ourDeviceId]["signed_curve25519"].get_int64();
-        if (perDevFlat.error() == simdjson::SUCCESS) {
-            resp.signedCurve25519Count = static_cast<int>(perDevFlat.value());
+    auto flatDev = root["device_one_time_keys_count"]["signed_curve25519"].get_int64();
+    if (flatDev.error() == simdjson::SUCCESS) {
+        resp.signedCurve25519Count = static_cast<int>(flatDev.value());
+        gotCount = true;
+    } else if (!ourDeviceId.empty()) {
+        auto perDev = root["device_one_time_keys_count"][ourDeviceId]["signed_curve25519"].get_int64();
+        if (perDev.error() == simdjson::SUCCESS) {
+            resp.signedCurve25519Count = static_cast<int>(perDev.value());
             gotCount = true;
         } else if (!ourUserId.empty()) {
             auto perDevNested = root["device_one_time_keys_count"][ourUserId][ourDeviceId]["signed_curve25519"].get_int64();

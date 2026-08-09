@@ -153,6 +153,10 @@ VerificationTransaction* VerificationManager::handleEvent(
     VerificationTransaction* txn = nullptr;
 
     if (eventType == "m.key.verification.request") {
+        // Dedup: the server can re-deliver a queued request (empty-since
+        // replay, retries) — never resurrect a transaction we already know.
+        if (findTransactionLocked(txnId)) return nullptr;
+
         auto methodsResult = val["methods"].get_array();
         bool hasSas = false;
         if (methodsResult.error() == simdjson::SUCCESS) {
