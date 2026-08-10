@@ -82,6 +82,8 @@ struct RoomData {
     std::string parentId;
     std::vector<std::string> typingUsers;  // users currently typing
     bool stateLoaded = false;  // m.room.encryption state already fetched for this room
+    bool pinned = false;   // pinned rooms stay in the top list band (user-set)
+    bool anchored = false; // anchored rooms stay in the second band (user-set)
 };
 
 } // namespace progressive::desktop

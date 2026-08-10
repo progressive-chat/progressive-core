@@ -24,8 +24,10 @@ bool ed25519Verify(const std::string& pubKeyBase64,
     );
 
     if (result == olm_error()) {
-        const char* err = olm_utility_last_error(util);
-        LOG(LogChannel::E2EE, "ed25519Verify FAILED: %s", err ? err : "(null)");
+        // No log here: this primitive is called per-claim inside OTK drain
+        // loops (stale keys from an older identity) — every failure used to
+        // spam "[E2EE] ed25519Verify FAILED: BAD_MESSAGE_MAC". The callers
+        // (verifyDeviceKeys / verifyOtk) log with context.
         return false;
     }
     return true;

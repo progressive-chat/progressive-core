@@ -51,9 +51,12 @@ RoomState::UpsertResult RoomState::upsertRoom(const RoomData& room) {
         return changed ? UpsertResult::Updated : UpsertResult::Unchanged;
     }
 
-    // Insert new — sorted by lastActivity descending.
+    // Insert new — sorted by band (pinned first, then anchored), each band
+    // by lastActivity descending.
     auto it = std::upper_bound(rooms_.begin(), rooms_.end(), room,
         [](const RoomData& a, const RoomData& b) {
+            if (a.pinned != b.pinned) return a.pinned;
+            if (a.anchored != b.anchored) return a.anchored;
             return a.lastActivityTs > b.lastActivityTs;
         });
     int newRow = static_cast<int>(std::distance(rooms_.begin(), it));

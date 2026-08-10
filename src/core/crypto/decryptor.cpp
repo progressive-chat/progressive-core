@@ -1295,6 +1295,7 @@ bool Decryptor::shareRoomKey(const std::string& roomId,
                                 // claiming until a VALID key surfaces or the
                                 // server stops serving keys for this device.
                                 bool claimOk = false;
+                                int drained = 0;
                                 for (int attempt = 0; attempt < otkDrainBudget_ && !claimOk; ++attempt) {
                                     std::string retryBody = "{\"one_time_keys\":{\"" + ck.userId
                                         + "\":{\"" + ck.deviceId + "\":\"signed_curve25519\"}}}";
@@ -1321,6 +1322,8 @@ bool Decryptor::shareRoomKey(const std::string& roomId,
                                                       std::string(rkSig.value()))) {
                                             ck.oneTimeKey = std::string(rkv.value());
                                             claimOk = true;
+                                        } else {
+                                            ++drained;
                                         }
                                         break;
                                     }
@@ -1333,10 +1336,10 @@ bool Decryptor::shareRoomKey(const std::string& roomId,
                                     // peer re-requests (key requests force fresh
                                     // claims). Never block the whole user.
                                     LOG(LogChannel::E2EE,
-                                        "shareRoomKey: OTK sig INVALID for %s/%s after drain — "
-                                        "proceeding with the claimed key anyway "
-                                        "(Element/Nheko parity; drain consumed %d stale keys)",
-                                        ck.userId.c_str(), ck.deviceId.c_str(), otkDrainBudget_);
+                                        "shareRoomKey: drained %d stale OTK(s) for %s/%s "
+                                        "(old-identity keys), proceeding with the claimed key "
+                                        "(Element/Nheko parity)",
+                                        drained, ck.userId.c_str(), ck.deviceId.c_str());
                                 }
                             }
                         }
@@ -2292,6 +2295,7 @@ bool Decryptor::sendOlmToDevice(const std::string& targetUserId,
         ? (otkDrainBudget_ > 10 ? 10 : otkDrainBudget_)
         : otkDrainBudget_;
     bool claimUsable = false;
+    int invalidClaims = 0;
     for (int attempt = 0; attempt <= drainCap && !claimUsable; ++attempt) {
         noteClaimed(targetUserId, targetDeviceId);
         std::string claimBody = "{\"one_time_keys\":{\"" + targetUserId
@@ -2320,8 +2324,12 @@ bool Decryptor::sendOlmToDevice(const std::string& targetUserId,
         if (oneTimeKey.empty()) break;
         if (otkSig.empty()) { claimUsable = true; break; }  // nothing to verify (server quirk)
         if (verifyOtk(theirEd, oneTimeKey, otkSig)) { claimUsable = true; break; }
-        LOG(LogChannel::E2EE, "sendOlmToDevice: OTK sig INVALID for %s/%s (claim %d) — draining",
-            targetUserId.c_str(), targetDeviceId.c_str(), attempt);
+        ++invalidClaims;
+    }
+    if (invalidClaims > 0) {
+        LOG(LogChannel::E2EE,
+            "sendOlmToDevice: drained %d stale OTK(s) for %s/%s (old-identity keys)",
+            invalidClaims, targetUserId.c_str(), targetDeviceId.c_str());
     }
     if (!claimUsable) {
         // Fail fast: an Olm message built with a stale (old-identity) key can

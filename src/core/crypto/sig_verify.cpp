@@ -47,11 +47,9 @@ bool verifyOtk(const std::string& deviceEd25519Key,
         return true;
     }
     std::string canonical = "{\"key\":\"" + otkCurve25519Key + "\"}";
-    bool ok = ed25519Verify(deviceEd25519Key, canonical, signatureBase64);
-    if (!ok) {
-        LOG(LogChannel::E2EE, "verifyOtk: INVALID");
-    }
-    return ok;
+    // No per-call log on failure: verifyOtk runs inside OTK drain loops
+    // (stale keys from an older identity) — the callers log the summary.
+    return ed25519Verify(deviceEd25519Key, canonical, signatureBase64);
 }
 
 } // namespace progressive::desktop
