@@ -58,6 +58,12 @@ void httpCleanup();
 // Pass ProxyConfig{.enabled=false} to disable.
 void setGlobalProxy(const ProxyConfig& cfg);
 
+// Optional progress callback for long transfers (uploads/downloads).
+// Fired by libcurl via CURLOPT_XFERINFOFUNCTION while a request runs.
+using HttpProgressFn = std::function<void(int64_t uploadBytes, int64_t uploadTotal,
+                                          int64_t downloadBytes, int64_t downloadTotal)>;
+void setHttpProgressCallback(HttpProgressFn fn);
+
 // Return a copy of the currently-configured global proxy.
 ProxyConfig getGlobalProxy();
 

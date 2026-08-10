@@ -21,6 +21,29 @@ namespace progressive::desktop {
 static ProxyConfig g_proxy;
 static std::mutex g_proxy_mutex;
 
+// Optional transfer-progress callback (uploads/downloads).
+static HttpProgressFn g_progress;
+static std::mutex g_progress_mutex;
+
+void setHttpProgressCallback(HttpProgressFn fn) {
+    std::lock_guard<std::mutex> lk(g_progress_mutex);
+    g_progress = std::move(fn);
+}
+
+static int progressCallback(void* clientp, curl_off_t dltotal, curl_off_t dlnow,
+                            curl_off_t ultotal, curl_off_t ulnow) {
+    HttpProgressFn fn;
+    {
+        std::lock_guard<std::mutex> lk(g_progress_mutex);
+        fn = g_progress;
+    }
+    if (fn) {
+        fn(static_cast<int64_t>(ulnow), static_cast<int64_t>(ultotal),
+           static_cast<int64_t>(dlnow), static_cast<int64_t>(dltotal));
+    }
+    return 0;
+}
+
 static bool g_initialized = false;
 
 // HTTP request log ring buffer (max 500 entries).
@@ -136,6 +159,9 @@ HttpResponse httpExecute(const HttpRequest& req) {
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, req.followRedirects ? 1L : 0L);
     curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 5L);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "progressive-desktop/" PROGRESSIVE_DESKTOP_VERSION);
+    // Transfer progress (when a callback is registered).
+    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+    curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, progressCallback);
     curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
 
     // Method + body
