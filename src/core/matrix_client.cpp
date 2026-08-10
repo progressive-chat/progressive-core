@@ -1660,6 +1660,19 @@ ApiResult<bool> MatrixClient::setAvatarUrl(const std::string& mxcUrl) {
     return r;
 }
 
+ApiResult<std::string> MatrixClient::getPresence(const std::string& userId) {
+    ApiResult<std::string> r;
+    if (!isLoggedIn()) { r.error.message = "not logged in"; return r; }
+    std::string url = account().homeserverUrl + "/_matrix/client/v3/presence/"
+        + urlEncodePath(userId) + "/status";
+    auto resp = httpGet(url, authHeaders(), 10000);
+    r.httpStatus = resp.statusCode;
+    if (resp.success) { r.ok = true; r.data = resp.body; }
+    else { if (!resp.body.empty()) r.error = progressive::parseMatrixErrorJson(resp.body);
+           r.error.message = resp.errorMessage.empty() ? r.error.message : resp.errorMessage; }
+    return r;
+}
+
 ApiResult<std::string> MatrixClient::getProfile(const std::string& userId) {
     ApiResult<std::string> r;
     if (!isLoggedIn()) { r.error.message = "not logged in"; return r; }

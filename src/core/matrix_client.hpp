@@ -427,6 +427,10 @@ public:
     // Returns JSON with displayname and avatar_url.
     ApiResult<std::string> getProfile(const std::string& userId);
 
+    // GET /_matrix/client/v3/presence/{userId}/status
+    // Returns the presence JSON: {"presence": "online|offline|unavailable|busy", ...}
+    ApiResult<std::string> getPresence(const std::string& userId);
+
     // ---- Send message with thread relation ----
 
     // PUT /_matrix/client/v3/rooms/{roomId}/send/m.room.encrypted/{txnId}
