@@ -520,6 +520,10 @@ static bool test_sas_verified_policy(const std::string& hs, TestUser& alice, Tes
     CHECK(roomRes.ok, "sas: room created");
     std::string roomId = roomRes.data;
     CHECK(alice2.client.joinRoom(roomId).ok, "sas: alice device joined");
+    // bob joins too: the key-request policy checks below need an UNVERIFIED
+    // MEMBER (the membership gate refuses non-members — the policy-off case
+    // must exercise a member who is merely unverified).
+    CHECK(bob.client.joinRoom(roomId).ok, "sas: bob joined (policy test)");
 
     // A1 creates the outbound session + shares, then A1 sends a message so the
     // room has a session to request.
