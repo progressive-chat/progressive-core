@@ -2094,7 +2094,7 @@ bool Decryptor::handleRoomKeyRequest(const std::string& contentJson,
                 "handleRoomKeyRequest: %s is not a member of %s — refusing "
                 "(member fetch http=%d body=[%.120s])",
                 senderId.c_str(), roomId.c_str(),
-                memberResp.httpStatus, memberResp.body.c_str());
+                memberResp.statusCode, memberResp.body.c_str());
             return false;
         }
     }
