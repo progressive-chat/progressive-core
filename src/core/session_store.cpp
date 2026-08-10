@@ -208,6 +208,31 @@ std::vector<AccountInfo> SessionStore::listAccounts() {
     return result;
 }
 
+bool SessionStore::activateAccount(const std::string& userId) {
+    std::lock_guard<std::recursive_mutex> lk(mtx_);
+    if (!db_) return false;
+    // Fetch the row, delete it and re-insert: loadAccount() returns the
+    // row with the highest rowid, so this makes the account "current".
+    AccountInfo a;
+    {
+        const char* sql = "SELECT user_id, device_id, homeserver_url, access_token, refresh_token"
+                          " FROM account WHERE user_id = ?;";
+        sqlite3_stmt* stmt = nullptr;
+        if (sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr) != SQLITE_OK) return false;
+        sqlite3_bind_text(stmt, 1, userId.c_str(), -1, SQLITE_TRANSIENT);
+        if (sqlite3_step(stmt) != SQLITE_ROW) { sqlite3_finalize(stmt); return false; }
+        a.userId        = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+        a.deviceId      = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+        a.homeserverUrl = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
+        a.accessToken   = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
+        a.refreshToken  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
+        sqlite3_finalize(stmt);
+    }
+    sqlite3_exec(db_, "DELETE FROM account WHERE user_id = ?;", nullptr, nullptr, nullptr);
+    // Re-insert via the normal path (new rowid).
+    return saveAccount(a);
+}
+
 bool SessionStore::clearAccount(const std::string& userId) {
     std::lock_guard<std::recursive_mutex> lk(mtx_);
     if (!db_) return false;

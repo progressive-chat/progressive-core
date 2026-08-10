@@ -50,6 +50,10 @@ public:
     std::optional<AccountInfo> loadAccount();
     bool clearAccount(const std::string& userId);
 
+    // Make the given account the one loadAccount() returns (re-inserts the
+    // row so it gets the newest rowid). Used by multi-account switching.
+    bool activateAccount(const std::string& userId);
+
     // List all saved accounts (for switcher UI)
     std::vector<AccountInfo> listAccounts();
 
