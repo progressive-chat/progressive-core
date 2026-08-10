@@ -2090,8 +2090,11 @@ bool Decryptor::handleRoomKeyRequest(const std::string& contentJson,
             }
         }
         if (!member) {
-            LOG(LogChannel::E2EE, "handleRoomKeyRequest: %s is not a member of %s — refusing",
-                senderId.c_str(), roomId.c_str());
+            LOG(LogChannel::E2EE,
+                "handleRoomKeyRequest: %s is not a member of %s — refusing "
+                "(member fetch http=%d body=[%.120s])",
+                senderId.c_str(), roomId.c_str(),
+                memberResp.httpStatus, memberResp.body.c_str());
             return false;
         }
     }
