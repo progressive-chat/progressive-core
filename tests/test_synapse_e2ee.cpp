@@ -525,8 +525,27 @@ static bool test_sas_verified_policy(const std::string& hs, TestUser& alice, Tes
     // must exercise a member who is merely unverified). The room is PRIVATE,
     // so bob must be INVITED first — a plain join of a private room without
     // an invite is rejected and never creates the member state event.
-    CHECK(alice.client.inviteUser(roomId, bob.userId).ok, "sas: bob invited");
-    CHECK(bob.client.joinRoom(roomId).ok, "sas: bob joined (policy test)");
+    std::cerr << "[sas-rev] policy test revision: invite+join (diag build)\n";
+    auto invRes = alice.client.inviteUser(roomId, bob.userId);
+    std::cerr << "[sas-rev] invite http=" << invRes.httpStatus << " ok=" << invRes.ok
+              << " code=" << invRes.error.code << " msg=" << invRes.error.message << "\n";
+    CHECK(invRes.ok, "sas: bob invited");
+    auto joinRes = bob.client.joinRoom(roomId);
+    std::cerr << "[sas-rev] bob join http=" << joinRes.httpStatus << " ok=" << joinRes.ok
+              << " code=" << joinRes.error.code << " msg=" << joinRes.error.message << "\n";
+    CHECK(joinRes.ok, "sas: bob joined (policy test)");
+    // Verify the server-side member state directly (the membership gate's fetch).
+    {
+        auto hs2 = hs;
+        auto tok2 = alice.token;
+        std::string memberUrl = hs2 + "/_matrix/client/v3/rooms/"
+            + roomId + "/state/m.room.member/" + bob.userId;
+        std::unordered_map<std::string, std::string> hdrs = {
+            {"Authorization", "Bearer " + tok2}};
+        auto memberResp = progressive::desktop::httpGet(memberUrl, hdrs, 10000);
+        std::cerr << "[sas-rev] bob member state http=" << memberResp.statusCode
+                  << " body=[" << memberResp.body.substr(0, 160) << "]\n";
+    }
 
     // A1 creates the outbound session + shares, then A1 sends a message so the
     // room has a session to request.
