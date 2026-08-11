@@ -10,7 +10,7 @@
 
 namespace progressive::crash {
 
-inline void installCrashHandler() {
+inline void installCrashHandler(bool quiet = false) {
     static auto handler = [](int sig) -> void {
         const char* name = "UNKNOWN";
         switch (sig) {
@@ -43,7 +43,7 @@ inline void installCrashHandler() {
     std::signal(SIGABRT, handler);
     std::signal(SIGFPE,  handler);
     std::signal(SIGILL,  handler);
-    std::fprintf(stderr, "[crash] handler installed\n");
+    if (!quiet) std::fprintf(stderr, "[crash] handler installed\n");
 }
 
 } // namespace
