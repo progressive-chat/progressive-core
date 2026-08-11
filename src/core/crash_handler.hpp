@@ -43,7 +43,8 @@ inline void installCrashHandler(bool quiet = false) {
     std::signal(SIGABRT, handler);
     std::signal(SIGFPE,  handler);
     std::signal(SIGILL,  handler);
-    if (!quiet) std::fprintf(stderr, "[crash] handler installed\n");
+    // Silent by default — the startup noise was confusing in scripts.
+    (void)quiet;
 }
 
 } // namespace
