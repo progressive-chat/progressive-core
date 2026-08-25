@@ -185,6 +185,11 @@ if(PROGRESSIVE_BUILD_TESTS)
     target_link_libraries(test_register_flows PRIVATE progressive_core)
     add_test(NAME register_flows COMMAND test_register_flows)
 
+    add_executable(test_mas_auth tests/test_mas_auth.cpp)
+    target_link_libraries(test_mas_auth PRIVATE progressive_core)
+    target_compile_options(test_mas_auth PRIVATE -include "${PN_SHIM}")
+    add_test(NAME mas_auth COMMAND test_mas_auth)
+
     add_executable(test_media_crypto tests/test_media_crypto.cpp)
     target_link_libraries(test_media_crypto PRIVATE progressive_core)
     add_test(NAME media_crypto COMMAND test_media_crypto)
