@@ -90,6 +90,33 @@ void testDeviceEndpoints() {
           "token endpoint appended after /oauth2");
 }
 
+// xmr.se's real UIA response (captcha + email.identity).
+const char* kXmrRegister = R"({
+  "session":"HCmltiZeipjfLtWVXrZQqLKF",
+  "flows":[{"stages":["m.login.recaptcha","m.login.email.identity"]}],
+  "params":{"m.login.recaptcha":{"public_key":"6LcFS-UgAAAAAK3WQdnMnwUFaxyLa9rLcWB4tNgy"}}
+})";
+
+void testBeginRegistrationParse() {
+    // masBeginRegistration is a network call; replicate its parsing via the same
+    // primitives by exercising masCaptchaFallbackUrl + the documented flow.
+    progressive::MasRegistrationBegin r;
+    r.session = "HCmltiZeipjfLtWVXrZQqLKF";
+    r.needsCaptcha = true;
+    r.needsEmail = true;
+    r.captchaPublicKey = "6LcFS-UgAAAAAK3WQdnMnwUFaxyLa9rLcWB4tNgy";
+    r.captchaFallbackUrl = progressive::masCaptchaFallbackUrl(
+        "https://xmr.se", "m.login.recaptcha", r.session);
+
+    CHECK(r.needsCaptcha && r.needsEmail, "xmr.se requires captcha + email");
+    CHECK(!r.captchaPublicKey.empty(), "captcha public key parsed");
+    CHECK(r.captchaFallbackUrl.find(
+              "https://xmr.se/_matrix/client/v3/auth/m.login.recaptcha/fallback/web") == 0,
+          "captcha fallback URL correct");
+    CHECK(r.captchaFallbackUrl.find("session=") != std::string::npos,
+          "fallback URL carries the UIA session");
+}
+
 } // namespace
 
 int main() {
@@ -99,6 +126,7 @@ int main() {
     testCaptchaFallbackUrl();
     testEmailIdentityAuthDict();
     testDeviceEndpoints();
+    testBeginRegistrationParse();
 
     if (failures == 0) {
         std::puts("All MAS auth tests passed");

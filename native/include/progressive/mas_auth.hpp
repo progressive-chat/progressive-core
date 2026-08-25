@@ -182,4 +182,50 @@ MasTokenResult masPollDeviceToken(const std::string& tokenEndpoint,
                                   const std::string& deviceCode,
                                   int interval);
 
+// ---- Native registration (generic Matrix UIA: email + captcha) ----
+//
+// xmr.se (and many Synapse homeservers) require a UIA flow such as
+// [m.login.recaptcha, m.login.email.identity]. Email verification is done
+// natively (masRequestRegistrationEmail + the auth dict below); only the
+// CAPTCHA stage needs a browser (open the fallback URL from masBeginRegistration).
+
+struct MasRegistrationBegin {
+    bool success = false;
+    std::string session;                 // UIA session id — thread through all calls
+    bool needsCaptcha = false;
+    std::string captchaPublicKey;        // reCAPTCHA site key (informational)
+    std::string captchaFallbackUrl;      // open in browser to satisfy the captcha
+    bool needsEmail = false;
+    std::string errorMessage;
+    std::string errcode;
+};
+
+// Start a registration: POST /register with an empty body to learn the UIA
+// session + required stages. Fills captchaFallbackUrl when a captcha is needed.
+MasRegistrationBegin masBeginRegistration(const std::string& homeserverUrl);
+
+struct MasRegistrationResult {
+    bool success = false;
+    std::string userId;
+    std::string accessToken;
+    std::string deviceId;
+    std::string errorMessage;
+    std::string errcode;
+    bool needsCaptcha = false;           // captcha not yet satisfied server-side
+    bool needsEmail = false;             // email.identity not yet satisfied
+    std::string session;
+};
+
+// Complete registration. Call after the user has clicked the email verification
+// link and (if required) solved the CAPTCHA in the browser. emailSid /
+// emailClientSecret come from masRequestRegistrationEmail().
+MasRegistrationResult masCompleteRegistration(
+    const std::string& homeserverUrl,
+    const std::string& username,
+    const std::string& password,
+    const std::string& session,
+    const std::string& emailSid,
+    const std::string& emailClientSecret,
+    bool inhibitLogin = false);
+
 } // namespace progressive

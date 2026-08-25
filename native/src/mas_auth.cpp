@@ -311,6 +311,77 @@ std::string masEmailIdentityAuthDict(const std::string& sid,
     return body.str();
 }
 
+// ==== Native registration (generic Matrix UIA) ====
+
+MasRegistrationBegin masBeginRegistration(const std::string& homeserverUrl) {
+    MasRegistrationBegin r;
+    std::string url = normalizeBase(homeserverUrl) + "/_matrix/client/v3/register";
+    auto resp = httpPost(url, "{}");
+    if (!resp.isOk() && resp.statusCode != 401) {
+        r.errcode = extractString(resp.body, "errcode");
+        r.errorMessage = extractString(resp.body, "error");
+        if (r.errorMessage.empty())
+            r.errorMessage = "Registration start failed (HTTP " +
+                             std::to_string(resp.statusCode) + ")";
+        return r;
+    }
+    r.session = extractString(resp.body, "session");
+    if (r.session.empty()) {
+        r.errorMessage = "No UIA session returned by server";
+        return r;
+    }
+    r.success = true;
+    r.needsCaptcha = contains(resp.body, "m.login.recaptcha");
+    r.needsEmail = contains(resp.body, "m.login.email.identity");
+    r.captchaPublicKey = extractString(resp.body, "public_key");
+    if (r.needsCaptcha)
+        r.captchaFallbackUrl = masCaptchaFallbackUrl(homeserverUrl,
+                                                     "m.login.recaptcha", r.session);
+    return r;
+}
+
+MasRegistrationResult masCompleteRegistration(
+    const std::string& homeserverUrl,
+    const std::string& username,
+    const std::string& password,
+    const std::string& session,
+    const std::string& emailSid,
+    const std::string& emailClientSecret,
+    bool inhibitLogin) {
+    MasRegistrationResult r;
+    r.session = session;
+
+    std::string emailAuth = masEmailIdentityAuthDict(emailSid, emailClientSecret, session);
+
+    std::ostringstream body;
+    body << R"({"auth":)" << emailAuth;
+    body << R"(,"username":")" << username << R"(")";
+    body << R"(,"password":")" << password << R"(")";
+    body << R"(,"inhibit_login":)" << (inhibitLogin ? "true" : "false");
+    body << "}";
+
+    std::string url = normalizeBase(homeserverUrl) + "/_matrix/client/v3/register";
+    auto resp = httpPost(url, body.str());
+
+    if (resp.isOk()) {
+        r.success = true;
+        r.userId = extractString(resp.body, "user_id");
+        r.accessToken = extractString(resp.body, "access_token");
+        r.deviceId = extractString(resp.body, "device_id");
+        return r;
+    }
+
+    r.errcode = extractString(resp.body, "errcode");
+    if (resp.statusCode == 401) {
+        r.needsCaptcha = contains(resp.body, "m.login.recaptcha");
+        r.needsEmail = contains(resp.body, "m.login.email.identity");
+    }
+    r.errorMessage = extractString(resp.body, "error");
+    if (r.errorMessage.empty())
+        r.errorMessage = "Registration failed (HTTP " + std::to_string(resp.statusCode) + ")";
+    return r;
+}
+
 // ==== OAuth2 device authorization grant (RFC 8628) ====
 
 std::string masDeviceAuthorizationEndpoint(const std::string& issuer) {
