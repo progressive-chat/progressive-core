@@ -353,4 +353,34 @@ inline std::string stripHtmlTags(const std::string& html) {
     }
     return result;
 }
+
+std::string toLower(const std::string& input) {
+    std::string out = input;
+    std::transform(out.begin(), out.end(), out.begin(),
+                   [](unsigned char c) { return (char)std::tolower(c); });
+    return out;
+}
+
+std::string toUpper(const std::string& input) {
+    std::string out = input;
+    std::transform(out.begin(), out.end(), out.begin(),
+                   [](unsigned char c) { return (char)std::toupper(c); });
+    return out;
+}
+
+bool endsWith(const std::string& s, const std::string& suffix) {
+    if (suffix.size() > s.size()) return false;
+    return s.compare(s.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+
+std::string replaceAll(const std::string& input, const std::string& from, const std::string& to) {
+    std::string out = input;
+    if (from.empty()) return out;
+    size_t pos = 0;
+    while ((pos = out.find(from, pos)) != std::string::npos) {
+        out.replace(pos, from.size(), to);
+        pos += to.size();
+    }
+    return out;
+}
 } // namespace progressive
