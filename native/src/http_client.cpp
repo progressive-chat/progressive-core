@@ -130,12 +130,99 @@ static HttpResponse parseHttpResponse(const std::string& raw) {
 
 // ==== Main Execute ====
 //
-// JNI bridge: the actual socket connection + TLS is done in Java via
-// javax.net.ssl.SSLSocket. This C++ function formats the HTTP request
-// and parses the response. The middle layer (send/receive) is in
-// jni_bridge.cpp's nativeTlsRequest() function.
-//
-// For now, returns a stub response. Will be wired via JNI.
+// On Android, the actual socket + TLS is done via the JNI bridge to
+// javax.net.ssl.SSLSocket (see tls_bridge.cpp). On desktop there is no
+// JVM, so we fall back to libcurl (handles TLS, proxies, redirects).
+
+#ifndef __ANDROID__
+#include <curl/curl.h>
+
+static size_t curlWriteCb(void* ptr, size_t size, size_t nmemb, void* userdata) {
+    auto* s = static_cast<std::string*>(userdata);
+    s->append(static_cast<char*>(ptr), size * nmemb);
+    return size * nmemb;
+}
+
+static size_t curlHeaderCb(char* buffer, size_t size, size_t nitems, void* userdata) {
+    auto* h = static_cast<std::unordered_map<std::string, std::string>*>(userdata);
+    std::string line(buffer, size * nitems);
+    auto colon = line.find(':');
+    if (colon != std::string::npos) {
+        std::string key = line.substr(0, colon);
+        std::string val = line.substr(colon + 1);
+        while (!val.empty() && (val.back() == '\r' || val.back() == '\n')) val.pop_back();
+        if (!val.empty() && val[0] == ' ') val = val.substr(1);
+        (*h)[key] = val;
+    }
+    return size * nitems;
+}
+
+// libcurl-backed execution for desktop builds.
+static HttpResponse httpExecuteCurl(const HttpRequest& req) {
+    HttpResponse resp;
+    CURL* curl = curl_easy_init();
+    if (!curl) {
+        resp.errorMessage = "curl init failed";
+        return resp;
+    }
+    std::string bodyBuf;
+    std::unordered_map<std::string, std::string> hdrBuf;
+    curl_easy_setopt(curl, CURLOPT_URL, req.url.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlWriteCb);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &bodyBuf);
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, curlHeaderCb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, &hdrBuf);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, req.timeoutMs);
+    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, 15000);
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, req.followRedirects ? 1L : 0L);
+    curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 5L);
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "progressive-native/1.0");
+
+    if (req.method == "GET") {
+        curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
+    } else if (req.method == "POST") {
+        curl_easy_setopt(curl, CURLOPT_POST, 1L);
+        if (!req.body.empty()) {
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, req.body.c_str());
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, static_cast<long>(req.body.size()));
+        }
+    } else if (req.method == "PUT") {
+        curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
+        if (!req.body.empty()) {
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, req.body.c_str());
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, static_cast<long>(req.body.size()));
+        }
+    } else if (req.method == "DELETE") {
+        curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
+    } else {
+        curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, req.method.c_str());
+    }
+
+    struct curl_slist* hl = nullptr;
+    for (const auto& [k, v] : req.headers) {
+        std::string entry = k + ": " + v;
+        hl = curl_slist_append(hl, entry.c_str());
+    }
+    if (hl) curl_easy_setopt(curl, CURLOPT_HTTPHEADER, hl);
+
+    CURLcode rc = curl_easy_perform(curl);
+    if (rc != CURLE_OK) {
+        resp.errorMessage = "curl: " + std::string(curl_easy_strerror(rc));
+        if (hl) curl_slist_free_all(hl);
+        curl_easy_cleanup(curl);
+        return resp;
+    }
+    long code = 0;
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
+    resp.statusCode = static_cast<int>(code);
+    resp.body = std::move(bodyBuf);
+    resp.headers = std::move(hdrBuf);
+    resp.success = (resp.statusCode >= 200 && resp.statusCode < 300);
+    if (hl) curl_slist_free_all(hl);
+    curl_easy_cleanup(curl);
+    return resp;
+}
+#endif // __ANDROID__
 
 HttpResponse httpExecute(const HttpRequest& req) {
     // Build HTTP request string
@@ -150,7 +237,7 @@ HttpResponse httpExecute(const HttpRequest& req) {
         return {0, "", {}, false, "Failed to parse URL: " + req.url};
     }
 
-    // Try TLS bridge (JNI → Java SSLSocket) if available
+    // Try TLS bridge (JNI → Java SSLSocket) if available (Android)
     if (tlsBridgeAvailable()) {
         std::string rawResponse = tlsBridgeRequest(
             parsed.host, parsed.port, httpRequest, req.timeoutMs);
@@ -161,8 +248,13 @@ HttpResponse httpExecute(const HttpRequest& req) {
         }
     }
 
+#ifndef __ANDROID__
+    // Desktop fallback: libcurl handles TLS, proxies and redirects.
+    return httpExecuteCurl(req);
+#else
     // Fallback: return error, caller should use Kotlin Retrofit
     return {0, "", {}, false, "JNI TLS bridge not available — use Retrofit fallback"};
+#endif
 }
 
 // ==== Form Body ====
